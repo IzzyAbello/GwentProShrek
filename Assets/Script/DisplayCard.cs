@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 using TMPro;
 public class DisplayCard : MonoBehaviour
 {
-    public List<Card> displayCardList = new List<Card>();
+    public Card displayCard;
     public int displayId = 0;
 
 
@@ -28,20 +28,19 @@ public class DisplayCard : MonoBehaviour
     public Image effectImage;
     public Image zoneImage;
 
-    // Start is called before the first frame update
     void Start()
     {
-        displayCardList = CardDatabase.cardListDatabase;
+        displayCard = CardDatabase.cardListDatabase[displayId];
 
-        cardId = displayCardList[displayId].cardId;
-        cardFaction = displayCardList[displayId].cardFaction;
-        cardPower = displayCardList[displayId].cardPower;
-        cardName = displayCardList[displayId].cardName;
-        cardDescription = displayCardList[displayId].cardDescription;
-        cardKind = displayCardList[displayId].cardKind;
-        cardZone = displayCardList[displayId].cardZone;
-        cardEffect = displayCardList[displayId].cardEffect;
-        cardSprite = displayCardList[displayId].cardSprite;
+        cardId = displayCard.cardId;
+        cardFaction = displayCard.cardFaction;
+        cardPower = displayCard.cardPower;
+        cardName = displayCard.cardName;
+        cardDescription = displayCard.cardDescription;
+        cardKind = displayCard.cardKind;
+        cardZone = displayCard.cardZone;
+        cardEffect = displayCard.cardEffect;
+        cardSprite = displayCard.cardSprite;
 
         nameText.text = cardName;
         powerText.text = cardPower.ToString();
@@ -49,7 +48,6 @@ public class DisplayCard : MonoBehaviour
         cardImage.sprite = cardSprite;
     }
 
-    // Update is called once per frame
     void Update()
     {
 

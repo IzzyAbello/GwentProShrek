@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 [System.Serializable]
 
-public class Card
+
+[CreateAssetMenu(fileName = "New Card", menuName = "Card", order = 1)]
+public class Card : ScriptableObject
 {
     public int cardId;
     public int cardFaction;
@@ -20,22 +22,16 @@ public class Card
 
     }
 
-    public Card (int id, int faction, int power, string name, string description, int kind, int zone, int effect, Sprite sprite)
+    public void CardInit (int cardId, int cardFaction, int cardPower, string cardName, string cardDescription, int cardKind, int cardZone, int cardEffect, Sprite cardSprite)
     {
-        cardId = id;
-        cardFaction = faction;
-        cardPower = power;
-        cardName = name;
-        cardDescription = description;
-        cardKind = kind;
-        cardZone = zone;
-        cardEffect = effect;
-        cardSprite = sprite;
-
-
-
-
-
-        /** RESINGONAUTAPINGAAAAAAAAAdfjfdnddjdfnjdfjdfnjddbdhdfhdfhdvd */
+        this.cardId = cardId;
+        this.cardFaction = cardFaction;
+        this.cardPower = cardPower;
+        this.cardName = cardName;
+        this.cardDescription = cardDescription;
+        this.cardKind = cardKind;
+        this.cardZone = cardZone;
+        this.cardEffect = cardEffect;
+        this.cardSprite = cardSprite;
     }
 }
