@@ -22,7 +22,7 @@ public class Card : ScriptableObject
 
     }
 
-    public void CardInit (int cardId, int cardFaction, int cardPower, string cardName, string cardDescription, int cardKind, int cardZone, int cardEffect, Sprite cardSprite)
+    public Card (int cardId, int cardFaction, int cardPower, string cardName, string cardDescription, int cardKind, int cardZone, int cardEffect, Sprite cardSprite)
     {
         this.cardId = cardId;
         this.cardFaction = cardFaction;

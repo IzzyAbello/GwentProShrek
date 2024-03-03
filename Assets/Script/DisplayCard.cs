@@ -4,10 +4,11 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
+
+
 public class DisplayCard : MonoBehaviour
 {
     public Card displayCard;
-    public int displayId = 0;
 
 
     public int cardId;
@@ -30,7 +31,6 @@ public class DisplayCard : MonoBehaviour
 
     void Start()
     {
-        displayCard = CardDatabase.cardListDatabase[displayId];
 
         cardId = displayCard.cardId;
         cardFaction = displayCard.cardFaction;

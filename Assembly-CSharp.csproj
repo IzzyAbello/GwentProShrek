@@ -64,7 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Script\Card.cs" />
-    <Compile Include="Assets\Script\CardDatabase.cs" />
+    <Compile Include="Assets\Script\Deck.cs" />
     <Compile Include="Assets\Script\DisplayCard.cs" />
     <Compile Include="Assets\Script\DisplayCardsInZone.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark01.cs" />
