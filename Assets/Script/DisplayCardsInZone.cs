@@ -13,16 +13,10 @@ public class DisplayCardsInZone : MonoBehaviour
     {
         for (int i = 0; i < 2; i++)
         {
-            hand.Add(Deck.deck[i]);
-            Debug.Log($"Card added: {hand[i].name}\n");
+            hand.Add(Deck.deck[0]);
+            Debug.Log($"Card added to hand: {hand[i].name}");
+            Deck.RemoveFromDeck(1);
         }
-
-
-        for (int i = 0; i < 2; i++)
-        {
-            Deck.deck.RemoveAt(0);
-        }
-
     }
 
     public void OnClick()
