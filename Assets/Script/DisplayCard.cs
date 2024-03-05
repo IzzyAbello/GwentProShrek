@@ -47,9 +47,4 @@ public class DisplayCard : MonoBehaviour
         descriptionText.text = cardDescription;
         cardImage.sprite = cardSprite;
     }
-
-    void Update()
-    {
-
-    }
 }

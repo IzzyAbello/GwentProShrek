@@ -53,6 +53,12 @@ public class DragDrop : MonoBehaviour
         if (isOverDropZone)
         {
             transform.SetParent(dropZone.transform, false);
+            DropZoneCards.cardsDropZone.Add(gameObject);
+
+            DisplayCardsInZone.RemoveFromHand(gameObject);
+            
+            Debug.Log($"Card removed from Hand: {gameObject.name}");
+            Debug.Log($"Card added to Drop Zone: {gameObject.name}");
         }
         else
         {

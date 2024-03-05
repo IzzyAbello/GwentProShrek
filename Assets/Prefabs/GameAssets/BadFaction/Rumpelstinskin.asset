@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8e3060ff70cbc44bb84abcd7614066a, type: 3}
   m_Name: Rumpelstinskin
   m_EditorClassIdentifier: 
-  cardId: 2
+  cardId: 4
   cardFaction: 1
   cardPower: 10
   cardName: Rumpelstinskin
