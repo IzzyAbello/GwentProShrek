@@ -15,6 +15,7 @@ MonoBehaviour:
   cardId: 1
   cardFaction: 0
   cardPower: 15
+  cardPowerOG: 15
   cardName: Shrek
   cardDescription: Mejor fuera que dentro
   cardKind: 0

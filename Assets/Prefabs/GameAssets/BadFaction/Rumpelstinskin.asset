@@ -15,6 +15,7 @@ MonoBehaviour:
   cardId: 4
   cardFaction: 1
   cardPower: 10
+  cardPowerOG: 10
   cardName: Rumpelstinskin
   cardDescription: Firmaaaaa
   cardKind: 0

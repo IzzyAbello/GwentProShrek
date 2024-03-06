@@ -15,6 +15,7 @@ MonoBehaviour:
   cardId: 2
   cardFaction: 0
   cardPower: 3
+  cardPowerOG: 3
   cardName: Burro
   cardDescription: Preguuuntame
   cardKind: 0

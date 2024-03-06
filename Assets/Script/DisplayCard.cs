@@ -8,12 +8,14 @@ using TMPro;
 
 public class DisplayCard : MonoBehaviour
 {
+    public bool isPowerUp = false;
     public Card displayCard;
 
 
     public int cardId;
     public int cardFaction;
     public int cardPower;
+    public int cardPowerOG;
     public string cardName;
     public string cardDescription;
     public int cardKind;
@@ -35,6 +37,7 @@ public class DisplayCard : MonoBehaviour
         cardId = displayCard.cardId;
         cardFaction = displayCard.cardFaction;
         cardPower = displayCard.cardPower;
+        cardPowerOG = displayCard.cardPowerOG;
         cardName = displayCard.cardName;
         cardDescription = displayCard.cardDescription;
         cardKind = displayCard.cardKind;
