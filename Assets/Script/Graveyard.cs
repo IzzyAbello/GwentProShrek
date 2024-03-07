@@ -5,10 +5,10 @@ using TMPro;
 
 public class Graveyard : MonoBehaviour
 {
-    public static List<GameObject> cardsGraveyard = new List<GameObject>();
+    public List<GameObject> cardsGraveyard = new List<GameObject>();
     public TextMeshProUGUI graveyardSize;
 
-    static void ShuffleGraveyard()
+    void ShuffleGraveyard()
     {
         Debug.Log("Shuffling Graveyard...\n");
 
@@ -21,7 +21,7 @@ public class Graveyard : MonoBehaviour
         }
     }
 
-    public static void RemoveFromGraveyard(int amount)
+    public void RemoveFromGraveyard(int amount)
     {
         for (int i = 1; i <= amount; i++)
         {

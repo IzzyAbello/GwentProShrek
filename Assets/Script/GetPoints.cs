@@ -7,9 +7,12 @@ public class GetPoints : MonoBehaviour
 {
     public TextMeshProUGUI pointsText;
 
+    public DropZoneCards dropZone;
+
+
     void Update()
     {
-        DropZoneCards.GetPoints();
-        pointsText.text = DropZoneCards.pointsInDropZone.ToString();
+        dropZone.GetPoints();
+        pointsText.text = dropZone.pointsInDropZone.ToString();
     }
 }

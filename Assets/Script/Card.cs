@@ -13,9 +13,9 @@ public class Card : ScriptableObject
     public int cardPowerOG;
     public string cardName;
     public string cardDescription;
-    public int cardKind;
-    public int cardZone;
-    public int cardEffect;
+    public char cardKind = 's';               // s, g
+    public char cardZone = 'M';               // M, R, S
+    public string cardEffect = "None";
     public Sprite cardSprite;
 
     public Card ()

@@ -18,7 +18,7 @@ MonoBehaviour:
   cardPowerOG: 15
   cardName: Lord Farquaad
   cardDescription: Duloc es un pueblo genial
-  cardKind: 0
+  cardKind: 103
   cardZone: 0
-  cardEffect: 0
+  cardEffect: 
   cardSprite: {fileID: 21300000, guid: 7bf7e5f9e0f15264aa3c700dd8974ea4, type: 3}

@@ -18,7 +18,7 @@ MonoBehaviour:
   cardPowerOG: 3
   cardName: Burro
   cardDescription: Preguuuntame
-  cardKind: 0
+  cardKind: 115
   cardZone: 0
-  cardEffect: 0
+  cardEffect: 
   cardSprite: {fileID: 21300000, guid: 336eb4ce4538e434598da002bf9086b7, type: 3}

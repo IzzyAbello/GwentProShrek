@@ -2,16 +2,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DisplayCardsInZone : MonoBehaviour
+public class Hand : MonoBehaviour
 {
-    public static List<GameObject> hand = new List<GameObject>();
+
+    public List<GameObject> hand = new List<GameObject>();
 
     public GameObject cardInHand;
     public GameObject playerHand;
 
-    static int size = hand.Count;
+    public Deck deck;
+    public Graveyard graveyard;
 
-    public static void RemoveFromHand(GameObject cardToRemove)
+    public void RemoveFromHand(GameObject cardToRemove)
     {
         for (int i = 0; i < hand.Count; i++)
         {
@@ -20,28 +22,27 @@ public class DisplayCardsInZone : MonoBehaviour
 
             if (getIDonHand.displayCard.cardId == getIDtoRemove.displayCard.cardId)
             {
-                
-                Graveyard.cardsGraveyard.Add(hand[i]);
+
+                graveyard.cardsGraveyard.Add(hand[i]);
                 hand.RemoveAt(i);
-                size--;
             }
         }
-            
     }
 
-
-    public void OnClick()
+    public void OnClickTakeFromDeck()
     {
         int n = 2;
+
+        int size = hand.Count;
+
         for (int i = size; i < size + n; i++)
         {
-            hand.Add(Deck.deck[0]);
+            hand.Add(deck.deck[0]);
             Debug.Log($"Card added to hand: {hand[hand.Count - 1].name}");
-            Deck.RemoveFromDeck(1);
+            deck.RemoveFromDeck(1);
             GameObject playerCard = Instantiate(hand[i], new Vector3(0, 0, 0), Quaternion.identity);
             playerCard.transform.SetParent(playerHand.transform, false);
         }
-        size = hand.Count;
 
         Debug.Log("Cards in hand: ");
         for (int i = 0; i < hand.Count; i++)

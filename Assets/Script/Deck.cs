@@ -6,10 +6,10 @@ using TMPro;
 
 public class Deck : MonoBehaviour
 {
-    public static List<GameObject> deck = new List<GameObject>();
+    public List<GameObject> deck = new List<GameObject>();
     public TextMeshProUGUI deckSize;
 
-    static void ShuffleDeck ()
+    void ShuffleDeck ()
     {
         Debug.Log("Shuffling Deck...\n");
 
@@ -22,7 +22,7 @@ public class Deck : MonoBehaviour
         }   
     }
     
-    public static void RemoveFromDeck (int amount)
+    public void RemoveFromDeck (int amount)
     {
         for (int i = 1; i <= amount; i++)
         {
@@ -43,6 +43,8 @@ public class Deck : MonoBehaviour
         deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/GoodFaction/BurroCard.prefab"));
         deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/BadFaction/LordFarquaadCard.prefab"));
         deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/BadFaction/RumpelstinskinCard.prefab"));
+        deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/ClimateCard.prefab"));
+        deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/DecoyCard.prefab"));
 
         Debug.Log($"Deck full size: {deck.Count}");
 

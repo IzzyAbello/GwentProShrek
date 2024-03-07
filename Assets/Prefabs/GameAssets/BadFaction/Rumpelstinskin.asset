@@ -18,7 +18,7 @@ MonoBehaviour:
   cardPowerOG: 10
   cardName: Rumpelstinskin
   cardDescription: Firmaaaaa
-  cardKind: 0
+  cardKind: 115
   cardZone: 0
-  cardEffect: 0
+  cardEffect: 
   cardSprite: {fileID: 21300000, guid: ee1c21b97d7c9014ba8840778977a612, type: 3}

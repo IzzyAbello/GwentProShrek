@@ -10,6 +10,7 @@ public class DragDrop : MonoBehaviour
     private GameObject dropZone;
     private Vector2 startPosition;
     private GameObject startParent;
+    private GameObject hand;
 
     private void Awake()
     {
@@ -43,6 +44,7 @@ public class DragDrop : MonoBehaviour
         {
             startPosition = transform.position;
             startParent = transform.parent.gameObject;
+            hand = transform.parent.gameObject;
             isDragging = true;
         }
     }
@@ -57,9 +59,12 @@ public class DragDrop : MonoBehaviour
             if (startParent != dropZone)
             {
                 startParent = dropZone;
-                
-                DropZoneCards.cardsDropZone.Add(gameObject);
-                DisplayCardsInZone.RemoveFromHand(gameObject);
+
+                dropZone.GetComponent<DropZoneCards>().cardsDropZone.Add(gameObject);
+
+                hand.GetComponent<Hand>().RemoveFromHand(gameObject);
+
+                gameObject.GetComponent<CardEffect>().PlayEffect();
 
                 Debug.Log($"Card removed from Hand: {gameObject.name}");
                 Debug.Log($"Card added to Drop Zone: {gameObject.name}");

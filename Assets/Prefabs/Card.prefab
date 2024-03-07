@@ -939,6 +939,7 @@ GameObject:
   - component: {fileID: 3452704281256457260}
   - component: {fileID: 22013423024073458}
   - component: {fileID: 5015834035914540031}
+  - component: {fileID: 5605133829916371234}
   m_Layer: 8
   m_Name: Card
   m_TagString: Untagged
@@ -1015,10 +1016,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 458be4c46ca0fd04b89831955e1482cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isPowerUp: 0
+  isUnderClimateEffect: 0
   displayCard: {fileID: 0}
   cardId: 0
   cardFaction: 0
   cardPower: 0
+  cardPowerOG: 0
   cardName: 
   cardDescription: 
   cardKind: 0
@@ -1196,6 +1200,18 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 1
   m_Constraints: 7
+--- !u!114 &5605133829916371234
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8491120924803336238}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9382ea33e87c9c340b03a4f3209c792b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8491120924937542788
 GameObject:
   m_ObjectHideFlags: 0

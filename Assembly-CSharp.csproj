@@ -64,14 +64,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Script\Card.cs" />
+    <Compile Include="Assets\Script\CardEffect.cs" />
     <Compile Include="Assets\Script\Deck.cs" />
     <Compile Include="Assets\Script\DisplayCard.cs" />
-    <Compile Include="Assets\Script\DisplayCardsInZone.cs" />
     <Compile Include="Assets\Script\DragDrop.cs" />
     <Compile Include="Assets\Script\DropZoneCards.cs" />
     <Compile Include="Assets\Script\GetPoints.cs" />
     <Compile Include="Assets\Script\Graveyard.cs" />
-    <Compile Include="Assets\Script\OnClickPowerUp.cs" />
+    <Compile Include="Assets\Script\Hand.cs" />
     <Compile Include="Assets\Script\ZoomCard.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark01.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark01_UGUI.cs" />

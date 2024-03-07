@@ -9,6 +9,7 @@ using TMPro;
 public class DisplayCard : MonoBehaviour
 {
     public bool isPowerUp = false;
+    public bool isUnderClimateEffect = false;
     public Card displayCard;
 
 
@@ -18,9 +19,9 @@ public class DisplayCard : MonoBehaviour
     public int cardPowerOG;
     public string cardName;
     public string cardDescription;
-    public int cardKind;
-    public int cardZone;
-    public int cardEffect;
+    public char cardKind;
+    public char cardZone;
+    public string cardEffect;
     public Sprite cardSprite;
 
     public TextMeshProUGUI nameText;
