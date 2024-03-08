@@ -18,12 +18,15 @@ public class DropZoneCards : MonoBehaviour
 
         for (int i = 0; i < cardsDropZone.Count; i++)
         {
-            cardsDropZone[i].GetComponent<DisplayCard>().cardPower = cardsDropZone[i].GetComponent<DisplayCard>().cardPowerOG;
-            cardsDropZone[i].GetComponent<DisplayCard>().powerText.text = cardsDropZone[i].GetComponent<DisplayCard>().cardPower.ToString();
-            cardsDropZone[i].GetComponent<DisplayCard>().powerText.color = Color.black;
-            cardsDropZone[i].GetComponent<DisplayCard>().displayCard.cardPower = cardsDropZone[i].GetComponent<DisplayCard>().displayCard.cardPowerOG;
-            cardsDropZone[i].GetComponent<DisplayCard>().isPowerUp = false;
-            cardsDropZone[i].GetComponent<DisplayCard>().isUnderClimateEffect = false;
+            cardsDropZone[i].GetComponent<DisplayCard>().CardReset();
+        }
+    }
+
+    public void ResetAllCards()
+    {
+        for (int i = 0; i < cardsDropZone.Count; i++)
+        {
+            cardsDropZone[i].GetComponent<DisplayCard>().CardReset();
         }
     }
 
@@ -39,23 +42,64 @@ public class DropZoneCards : MonoBehaviour
     }
 
 
+    public void CommunionActivation ()
+    {
+        int aux = 0;
+        int cardId = 0;
+        for (int i = 0; i < cardsDropZone.Count; i++)
+        {
+            DisplayCard card = cardsDropZone[i].GetComponent<DisplayCard>();
+            if (card.cardEffect == "Communion")
+            {
+                aux++;
+                cardId = card.cardId;
+            }
+        }
+        if (aux > 0)
+            for (int i = 0; i < cardsDropZone.Count; i++)
+            {
+                PowerUpSpecifiedCard(cardId, aux);
+            }
+    }
+
     public void PowerUpDropZone ()
     {
         isPoweredUp = true;
 
         for (int i = 0; i < cardsDropZone.Count; i++)
         {
-            if (!cardsDropZone[i].GetComponent<DisplayCard>().isPowerUp && cardsDropZone[i].GetComponent<DisplayCard>().displayCard.cardKind != 'g')
+            DisplayCard card = cardsDropZone[i].GetComponent<DisplayCard>();
+
+            if (!card.isPowerUp && card.displayCard.cardKind != 'g')
             {
-                cardsDropZone[i].GetComponent<DisplayCard>().displayCard.cardPower *= 2;
-                cardsDropZone[i].GetComponent<DisplayCard>().cardPower *= 2;
-                cardsDropZone[i].GetComponent<DisplayCard>().powerText.text = cardsDropZone[i].GetComponent<DisplayCard>().cardPower.ToString();
-                cardsDropZone[i].GetComponent<DisplayCard>().powerText.color = Color.green;
-                cardsDropZone[i].GetComponent<DisplayCard>().isPowerUp = true;
+                card.CardPowerUp();
             }
         }
     }
 
+    public void PowerUpSpecifiedCard(int id, int times)
+    {
+        for (int i = 0; i < cardsDropZone.Count; i++)
+        {
+            DisplayCard card = cardsDropZone[i].GetComponent<DisplayCard>();
+
+            if (card.displayCard.cardKind != 'g' && card.cardId == id)
+            {
+                card.CardReset();
+                if (!isPoweredUp && !isUnderClimateEffect)
+                    card.CardPowerUp(times);
+                if (isPoweredUp)
+                {
+                    card.CardPowerUp();
+                    card.CardPowerUp(times);
+                }
+                if (isUnderClimateEffect)
+                {
+                    card.CardUnderClimateEffect();
+                }
+            }
+        }
+    }
 
     public void ClimateEffectDropZone()
     {
@@ -63,18 +107,71 @@ public class DropZoneCards : MonoBehaviour
 
         for (int i = 0; i < cardsDropZone.Count; i++)
         {
-            if (!cardsDropZone[i].GetComponent<DisplayCard>().isUnderClimateEffect && cardsDropZone[i].GetComponent<DisplayCard>().displayCard.cardKind != 'g')
+            DisplayCard card = cardsDropZone[i].GetComponent<DisplayCard>();
+
+            if (!card.isUnderClimateEffect && card.displayCard.cardKind != 'g')
             {
-                cardsDropZone[i].GetComponent<DisplayCard>().displayCard.cardPower = 1;
-                cardsDropZone[i].GetComponent<DisplayCard>().cardPower = 1;
-                cardsDropZone[i].GetComponent<DisplayCard>().powerText.text = cardsDropZone[i].GetComponent<DisplayCard>().cardPower.ToString();
-                cardsDropZone[i].GetComponent<DisplayCard>().powerText.color = Color.red;
-                cardsDropZone[i].GetComponent<DisplayCard>().isUnderClimateEffect = true;
+                cardsDropZone[i].GetComponent<DisplayCard>().CardUnderClimateEffect();
             }
         }
     }
 
+    public (int ,GameObject) GetTheHighestCard()
+    {
+        int aux = -1;
+        int cardIndex = 0;
+        GameObject getCard = null;
 
+        for (int i = 0; i < cardsDropZone.Count; i++)
+        {
+            DisplayCard card = cardsDropZone[i].GetComponent<DisplayCard>();
+
+            if (aux < card.cardPower && card.cardKind != 'g')
+            {
+                getCard = cardsDropZone[i];
+                aux = cardsDropZone[i].GetComponent<DisplayCard>().cardPower;
+                cardIndex = i;
+            }
+        }
+
+        var ans = (cardIndex, getCard);
+
+        return ans;
+    }
+
+    public (int, GameObject) GetTheLowestCard()
+    {
+        int aux = 100;
+        int cardIndex = 0;
+        GameObject getCard = null;
+
+        for (int i = 0; i < cardsDropZone.Count; i++)
+        {
+            DisplayCard card = cardsDropZone[i].GetComponent<DisplayCard>();
+
+            if (aux > card.cardPower && card.cardKind != 'g')
+            {
+                getCard = cardsDropZone[i];
+                aux = cardsDropZone[i].GetComponent<DisplayCard>().cardPower;
+                cardIndex = i;
+            }
+        }
+
+        var ans = (cardIndex, getCard);
+
+        return ans;
+    }
+
+    public int GetCountOfSpecifiedCard (int id)
+    {
+        int ans = 0;
+        for (int i = 0; i < cardsDropZone.Count; i++)
+        {
+            if (cardsDropZone[i].GetComponent<DisplayCard>().cardId == id)
+                ans++;
+        }
+        return ans;
+    }
 
     public void GetPoints ()
     {

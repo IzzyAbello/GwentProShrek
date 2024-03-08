@@ -40,11 +40,16 @@ public class Deck : MonoBehaviour
         //deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("")); Template
 
         deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/GoodFaction/ShrekCard.prefab"));
-        deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/GoodFaction/BurroCard.prefab"));
-        deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/BadFaction/LordFarquaadCard.prefab"));
+        //deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/GoodFaction/BurroCard.prefab"));
+        //deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/BadFaction/LordFarquaadCard.prefab"));
         deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/BadFaction/RumpelstinskinCard.prefab"));
+
+        deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/GoodFaction/Cerdito1Card.prefab"));
+        deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/GoodFaction/Cerdito2Card.prefab"));
+        deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/GoodFaction/Cerdito3Card.prefab"));
+
         deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/ClimateCard.prefab"));
-        deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/DecoyCard.prefab"));
+        //deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/DecoyCard.prefab"));
 
         Debug.Log($"Deck full size: {deck.Count}");
 

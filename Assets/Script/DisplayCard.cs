@@ -32,6 +32,38 @@ public class DisplayCard : MonoBehaviour
     public Image effectImage;
     public Image zoneImage;
 
+
+    public void CardReset ()
+    {
+        cardPower = cardPowerOG;
+        powerText.text = cardPower.ToString();
+        powerText.color = Color.black;
+        displayCard.cardPower = displayCard.cardPowerOG;
+        isPowerUp = false;
+        isUnderClimateEffect = false;
+    }
+
+    public void CardPowerUp (int n = 2)
+    {
+        displayCard.cardPower *= n;
+        cardPower *= n;
+        powerText.text = cardPower.ToString();
+        powerText.color = Color.green;
+        isPowerUp = true;
+    }
+
+    public void CardUnderClimateEffect()
+    {
+        if (cardPower > 0)
+        displayCard.cardPower = 1;
+        if (isPowerUp)
+            displayCard.cardPower = 2;
+        cardPower = displayCard.cardPower;
+        powerText.text = cardPower.ToString();
+        powerText.color = Color.red;
+        isUnderClimateEffect = true;
+    }
+
     void Start()
     {
 
