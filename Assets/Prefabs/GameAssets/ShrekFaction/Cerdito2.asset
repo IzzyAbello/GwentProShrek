@@ -12,13 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8e3060ff70cbc44bb84abcd7614066a, type: 3}
   m_Name: Cerdito2
   m_EditorClassIdentifier: 
-  cardId: 7
+  cardId: 8
   cardFaction: 0
   cardPower: 2
   cardPowerOG: 2
-  cardName: Cerdito dos
-  cardDescription: un cerdito
+  cardName: 2do Cerdito
+  cardDescription: "Buf\xF3..."
+  cardCommunion: Pork
   cardKind: 115
-  cardZone: 77
+  cardZone: 83
   cardEffect: Communion
-  cardSprite: {fileID: 21300000, guid: 72f862a359f42b94fb7fcdd9ebdbc841, type: 3}
+  cardSprite: {fileID: 21300000, guid: bc82cfcc16f04b846823c4458b5737fc, type: 3}

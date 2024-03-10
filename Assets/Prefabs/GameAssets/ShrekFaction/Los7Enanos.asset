@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8e3060ff70cbc44bb84abcd7614066a, type: 3}
+  m_Name: Los7Enanos
+  m_EditorClassIdentifier: 
+  cardId: 10
+  cardFaction: 0
+  cardPower: 7
+  cardPowerOG: 7
+  cardName: Los 7 Enanos
+  cardDescription: No no no a la vieja muerta me la bajan de la mesa!!!
+  cardCommunion: None
+  cardKind: 115
+  cardZone: 82
+  cardEffect: None
+  cardSprite: {fileID: 21300000, guid: 1f549a9cac4cf934aabc835e23ccd65c, type: 3}

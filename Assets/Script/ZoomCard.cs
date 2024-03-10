@@ -7,7 +7,7 @@ public class ZoomCard : MonoBehaviour
     public GameObject canvas;
 
     private GameObject zoomCard;
-    private Vector2 zoomScale = new Vector2(2, 2);
+    private Vector2 zoomScale = new Vector2(4, 4);
 
 
     public void Awake()
@@ -17,7 +17,7 @@ public class ZoomCard : MonoBehaviour
 
     public void OnCardAreaEnter ()
     {
-        zoomCard = Instantiate(gameObject, new Vector2(300, 400), Quaternion.identity);
+        zoomCard = Instantiate(gameObject, new Vector2(261, 290), Quaternion.identity);
         
         
         zoomCard.transform.SetParent(canvas.transform, false);

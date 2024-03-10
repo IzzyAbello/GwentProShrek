@@ -28,8 +28,11 @@ public class DragDrop : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        isOverDropZone = true;
-        dropZone = collision.gameObject;
+        if (gameObject.GetComponent<CanPlayCard>().CanPlaySpecificCard(collision.gameObject))
+        {
+            isOverDropZone = true;
+            dropZone = collision.gameObject;
+        }
     }
 
     private void OnCollisionExit2D(Collision2D collision)
@@ -52,8 +55,11 @@ public class DragDrop : MonoBehaviour
     public void EndDrag ()
     {
         isDragging = false;
+
         if (isOverDropZone)
         {
+
+
             transform.SetParent(dropZone.transform, false);
 
             if (startParent != dropZone)

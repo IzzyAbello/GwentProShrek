@@ -16,9 +16,10 @@ MonoBehaviour:
   cardFaction: 0
   cardPower: 2
   cardPowerOG: 2
-  cardName: Cerdito uno
-  cardDescription: un cerdito
+  cardName: 1er Cerdito
+  cardDescription: "Sopl\xF3..."
+  cardCommunion: Pork
   cardKind: 115
-  cardZone: 77
+  cardZone: 83
   cardEffect: Communion
-  cardSprite: {fileID: 21300000, guid: 72f862a359f42b94fb7fcdd9ebdbc841, type: 3}
+  cardSprite: {fileID: 21300000, guid: 5528038646e496642b5e4e691f5c4536, type: 3}

@@ -31,7 +31,7 @@ public class Hand : MonoBehaviour
 
     public void OnClickTakeFromDeck()
     {
-        int n = 2;
+        int n = 1;
 
         int size = hand.Count;
 
@@ -46,6 +46,10 @@ public class Hand : MonoBehaviour
 
         Debug.Log("Cards in hand: ");
         for (int i = 0; i < hand.Count; i++)
+        {
+            hand[i].GetComponent<DisplayCard>().CardReset();
             Debug.Log($"Card {i}: {hand[i].gameObject.name}");
+        }
+
     }
 }

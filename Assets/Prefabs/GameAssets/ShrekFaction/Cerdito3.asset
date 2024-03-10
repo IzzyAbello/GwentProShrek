@@ -12,13 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8e3060ff70cbc44bb84abcd7614066a, type: 3}
   m_Name: Cerdito3
   m_EditorClassIdentifier: 
-  cardId: 7
+  cardId: 9
   cardFaction: 0
   cardPower: 2
   cardPowerOG: 2
-  cardName: Cerdito tres
-  cardDescription: un cerdito
+  cardName: 3er Cerdito
+  cardDescription: "Y firm\xF3 una orden de desalojo... :("
+  cardCommunion: Pork
   cardKind: 115
-  cardZone: 77
+  cardZone: 83
   cardEffect: Communion
-  cardSprite: {fileID: 21300000, guid: 72f862a359f42b94fb7fcdd9ebdbc841, type: 3}
+  cardSprite: {fileID: 21300000, guid: 39b4c690f151cb145b3bc0ef24fd1ef8, type: 3}

@@ -7,6 +7,7 @@ public class DropZoneCards : MonoBehaviour
     public List<GameObject> cardsDropZone = new List<GameObject>();
     public bool isPoweredUp = false;
     public bool isUnderClimateEffect = false;
+    public bool isAveraged = false;
 
     public int pointsInDropZone;
 
@@ -26,7 +27,13 @@ public class DropZoneCards : MonoBehaviour
     {
         for (int i = 0; i < cardsDropZone.Count; i++)
         {
-            cardsDropZone[i].GetComponent<DisplayCard>().CardReset();
+            isUnderClimateEffect = false;
+            DisplayCard card = cardsDropZone[i].GetComponent<DisplayCard>();
+            card.CardReset();
+            if (isPoweredUp)
+                card.CardPowerUp();
+            if (card.cardEffect == "Communion")
+                CommunionActivation();
         }
     }
 
@@ -45,17 +52,17 @@ public class DropZoneCards : MonoBehaviour
     public void CommunionActivation ()
     {
         int aux = 0;
-        int cardId = 0;
+        string cardId = null;
         for (int i = 0; i < cardsDropZone.Count; i++)
         {
             DisplayCard card = cardsDropZone[i].GetComponent<DisplayCard>();
             if (card.cardEffect == "Communion")
             {
                 aux++;
-                cardId = card.cardId;
+                cardId = card.cardCommunion;
             }
         }
-        if (aux > 0)
+        if (aux > 1)
             for (int i = 0; i < cardsDropZone.Count; i++)
             {
                 PowerUpSpecifiedCard(cardId, aux);
@@ -77,13 +84,13 @@ public class DropZoneCards : MonoBehaviour
         }
     }
 
-    public void PowerUpSpecifiedCard(int id, int times)
+    public void PowerUpSpecifiedCard(string id, int times)
     {
         for (int i = 0; i < cardsDropZone.Count; i++)
         {
             DisplayCard card = cardsDropZone[i].GetComponent<DisplayCard>();
 
-            if (card.displayCard.cardKind != 'g' && card.cardId == id)
+            if (card.displayCard.cardKind != 'g' && card.cardCommunion == id)
             {
                 card.CardReset();
                 if (!isPoweredUp && !isUnderClimateEffect)
@@ -162,15 +169,33 @@ public class DropZoneCards : MonoBehaviour
         return ans;
     }
 
-    public int GetCountOfSpecifiedCard (int id)
+    public int GetCountOfSpecifiedCard (string id)
     {
         int ans = 0;
         for (int i = 0; i < cardsDropZone.Count; i++)
         {
-            if (cardsDropZone[i].GetComponent<DisplayCard>().cardId == id)
+            if (cardsDropZone[i].GetComponent<DisplayCard>().cardCommunion == id)
                 ans++;
         }
         return ans;
+    }
+
+    public void AverageCardsInDropZone()
+    {
+        int average = 0;
+        for (int i = 0; i < cardsDropZone.Count; i++)
+        {
+            average += cardsDropZone[i].GetComponent<DisplayCard>().cardPower;
+        }
+        average /= cardsDropZone.Count;
+
+        for (int i = 0; i < cardsDropZone.Count; i++)
+        {
+            DisplayCard card = cardsDropZone[i].GetComponent<DisplayCard>();
+            if (card.cardKind != 'g')
+                card.AverageCard(average);
+
+        }
     }
 
     public void GetPoints ()

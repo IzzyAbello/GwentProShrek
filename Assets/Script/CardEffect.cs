@@ -33,7 +33,7 @@ public class CardEffect : MonoBehaviour
             dropZoneCards.ClimateEffectDropZone();
         }
 
-        if (effect == "Decoy")
+        if (effect == "Decoy") // Change Hand...
         {
             var toReturn = dropZoneCards.GetTheHighestCard();
             int cardIndex = toReturn.Item1;
@@ -92,7 +92,7 @@ public class CardEffect : MonoBehaviour
 
         if (effect == "Communion")
         {
-            int cardId = gameObject.GetComponent<DisplayCard>().cardId;
+            string cardId = gameObject.GetComponent<DisplayCard>().cardCommunion;
 
             int timesPowerUp = dropZoneCards.GetCountOfSpecifiedCard(cardId);
 
@@ -103,6 +103,21 @@ public class CardEffect : MonoBehaviour
         if (effect == "ClearClimate")
         {
             dropZoneCards.ResetAllCards();
+        }
+
+        if (effect == "Average")
+        {
+            dropZoneCards.AverageCardsInDropZone();
+        }
+
+        if (effect == "Take")       //Next
+        {
+            
+        }
+
+        if (effect == "DestroyLine") //Next
+        {
+
         }
     }
 }

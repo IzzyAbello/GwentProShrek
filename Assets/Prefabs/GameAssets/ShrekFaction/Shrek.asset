@@ -18,7 +18,8 @@ MonoBehaviour:
   cardPowerOG: 15
   cardName: Shrek
   cardDescription: Mejor fuera que dentro
+  cardCommunion: None
   cardKind: 103
-  cardZone: 0
+  cardZone: 77
   cardEffect: PowerUp
   cardSprite: {fileID: 21300000, guid: 0614a8d8cceffba48b8199e737d90f5f, type: 3}

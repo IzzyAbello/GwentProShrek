@@ -13,6 +13,7 @@ public class Card : ScriptableObject
     public int cardPowerOG;
     public string cardName;
     public string cardDescription;
+    public string cardCommunion = "None";     // Pork
     public char cardKind = 's';               // s, g
     public char cardZone = 'M';               // M, R, S
     public string cardEffect = "None";

@@ -80,12 +80,12 @@ PrefabInstance:
     - target: {fileID: 8491120924803336237, guid: 7bcf4ea214e5ba645adbd3044c18c27d,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 200
+      value: 80
       objectReference: {fileID: 0}
     - target: {fileID: 8491120924803336237, guid: 7bcf4ea214e5ba645adbd3044c18c27d,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 300
+      value: 120
       objectReference: {fileID: 0}
     - target: {fileID: 8491120924803336237, guid: 7bcf4ea214e5ba645adbd3044c18c27d,
         type: 3}
@@ -206,12 +206,17 @@ PrefabInstance:
     - target: {fileID: 8491120925695047228, guid: 7bcf4ea214e5ba645adbd3044c18c27d,
         type: 3}
       propertyPath: m_fontSize
-      value: 20
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 8491120925695047228, guid: 7bcf4ea214e5ba645adbd3044c18c27d,
         type: 3}
       propertyPath: m_fontSizeBase
-      value: 20
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 8491120925695047228, guid: 7bcf4ea214e5ba645adbd3044c18c27d,
+        type: 3}
+      propertyPath: m_firstOverflowCharacterIndex
+      value: -1
       objectReference: {fileID: 0}
     - target: {fileID: 8491120924185017129, guid: 7bcf4ea214e5ba645adbd3044c18c27d,
         type: 3}
