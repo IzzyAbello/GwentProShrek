@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: Lluvia
   m_EditorClassIdentifier: 
   cardId: 5
-  cardFaction: 2
+  cardFaction: 0
   cardPower: 0
   cardPowerOG: 0
   cardName: Lluvia
   cardDescription: Simplemente Llueve
-  cardCommunion: None
+  cardCommunion: Rain
   cardKind: 115
   cardZone: 67
   cardEffect: Climate

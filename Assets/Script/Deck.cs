@@ -69,9 +69,9 @@ public class Deck : MonoBehaviour
 
 
         /*deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/BadFaction/LordFarquaadCard.prefab"));
-        deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/BadFaction/RumpelstinskinCard.prefab"));
+        deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/BadFaction/RumpelstinskinCard.prefab"));*/
 
-        deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/ClimateCard.prefab"));*/
+        deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/ClimateCard.prefab"));
         //deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/DecoyCard.prefab"));
 
 

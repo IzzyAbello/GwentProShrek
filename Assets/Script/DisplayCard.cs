@@ -96,6 +96,14 @@ public class DisplayCard : MonoBehaviour
         {
             zoneImage.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Resources/SSS.png");
         }
+        if (cardZone == 'C')
+        {
+            zoneImage.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Resources/NULL_IMAGE.png");
+        }
+        if (cardZone == 'P')
+        {
+            zoneImage.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Resources/PPP.png");
+        }
 
         if (cardEffect == "PowerUp")
         {

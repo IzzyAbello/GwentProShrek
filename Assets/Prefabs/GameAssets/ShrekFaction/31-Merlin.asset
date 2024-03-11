@@ -20,6 +20,6 @@ MonoBehaviour:
   cardDescription: "Con esa t\xFAnica se le ven los..."
   cardCommunion: None
   cardKind: 115
-  cardZone: 82
+  cardZone: 83
   cardEffect: None
   cardSprite: {fileID: 21300000, guid: 0e9793f9329b1ce4b9fc195473b23801, type: 3}

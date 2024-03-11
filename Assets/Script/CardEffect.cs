@@ -4,18 +4,24 @@ using UnityEngine;
 
 public class CardEffect : MonoBehaviour
 {
-    private GameObject hand; // Change public when 2 players
+    private GameObject hand;
     private GameObject graveyard;
+    private GameObject graveyardOpposite;
     private GameObject cardToRemove;
+    private GameObject cardToRemoveOpposite;
+    
 
     public void PlayEffect ()
     {
         string effect = GetComponent<DisplayCard>().cardEffect;
 
         GameObject dropZone = gameObject.transform.parent.gameObject;
-        DropZoneCards dropZoneCards = dropZone.GetComponent<DropZoneCards>(); //Change to public
+        DropZoneCards dropZoneCards = dropZone.GetComponent<DropZoneCards>();
 
-        if (effect == "PowerUp" || dropZone.GetComponent<DropZoneCards>().isPoweredUp) //Change for special
+        GameObject opposite = dropZone.GetComponent<DropZoneConditions>().oppositeDropZone;
+        DropZoneCards oppositeCards = opposite.GetComponent<DropZoneCards>();
+
+        if (effect == "PowerUp" || dropZone.GetComponent<DropZoneCards>().isPoweredUp)
         {
             if (gameObject.GetComponent<DisplayCard>().displayCard.cardKind != 'g')
             {
@@ -28,18 +34,56 @@ public class CardEffect : MonoBehaviour
             }
         }
 
-        if (effect == "Climate" || dropZone.GetComponent<DropZoneCards>().isUnderClimateEffect) //Enemy Field Comming Soon
+        if (effect == "Climate" || dropZone.GetComponent<DropZoneCards>().isUnderClimateEffect)
         {
-            dropZoneCards.ClimateEffectDropZone();
+            string climateType = GetComponent<DisplayCard>().cardCommunion;
+            DropZoneCards climateZone = dropZone.GetComponent<DropZoneCards>();
+            climateZone.climateS = dropZoneCards.climateS;
+            climateZone.climateR = dropZoneCards.climateR;
+            climateZone.climateM = dropZoneCards.climateM;
+
+            if (effect != "Climate")
+            {
+                GetComponent<DisplayCard>().CardUnderClimateEffect();
+            }
+            else
+            {
+                if (climateType == "Rain")
+                {
+                    climateZone.climateS.GetComponent<DropZoneCards>().ClimateEffectDropZone();
+                    climateZone.climateS.GetComponent<DropZoneConditions>().oppositeDropZone.GetComponent<DropZoneCards>().ClimateEffectDropZone();
+                }
+                    
+                if (climateType == "Wind")
+                {
+                    climateZone.climateR.GetComponent<DropZoneCards>().ClimateEffectDropZone();
+                    climateZone.climateR.GetComponent<DropZoneConditions>().oppositeDropZone.GetComponent<DropZoneCards>().ClimateEffectDropZone();
+                }
+                    
+                if (climateType == "Snow")
+                {
+                    climateZone.climateM.GetComponent<DropZoneCards>().ClimateEffectDropZone();
+                    climateZone.climateR.GetComponent<DropZoneConditions>().oppositeDropZone.GetComponent<DropZoneCards>().ClimateEffectDropZone();
+                }
+                if (climateType == "ClearClimate") //Through GameMaster
+                {
+                    GameObject clear = GameObject.Find("Clear");
+                    clear.GetComponent<ClearAllField>().ClearClimate();
+                }
+            }
         }
 
-        if (effect == "Decoy") // Change Hand...
+        if (effect == "Decoy")
         {
             var toReturn = dropZoneCards.GetTheHighestCard();
             int cardIndex = toReturn.Item1;
             cardToRemove = toReturn.Item2;
 
-            hand = GameObject.Find("Hand");
+
+            if (GetComponent<DisplayCard>().cardFaction == 0)
+                hand = GameObject.Find("HandShrek");
+            else
+                hand = GameObject.Find("HandBad");
 
             cardToRemove.GetComponent<DisplayCard>().CardReset();
 
@@ -52,42 +96,49 @@ public class CardEffect : MonoBehaviour
             cardToRemove = null;
         }
 
-        if (effect == "Destroyer") // Destroy in both sides
+        if (effect == "Destroyer" || effect == "WeakDestroyer")
         {
-            var toReturn = dropZoneCards.GetTheHighestCard();
-            int cardIndex = toReturn.Item1;
-            cardToRemove = toReturn.Item2;
+            (int, GameObject) toReturnSelf;
+            (int, GameObject) toReturnOpposite;
 
+            if (effect == "Destroyer")
+            {
+                toReturnSelf = dropZoneCards.GetTheHighestCard();
+                toReturnOpposite = oppositeCards.GetTheHighestCard();
+            }
+            else
+            {
+                toReturnSelf = dropZoneCards.GetTheLowestCard();
+                toReturnOpposite = oppositeCards.GetTheLowestCard();
+            }
+
+            int cardIndexSelf = toReturnSelf.Item1;
+            int cardIndexOpposite = toReturnOpposite.Item1;
+
+            cardToRemove = toReturnSelf.Item2;
             cardToRemove.GetComponent<DisplayCard>().CardReset();
 
-            graveyard = GameObject.Find("GraveYard");
+            graveyard = dropZone.GetComponent<DropZoneConditions>().graveyard;
 
             Debug.Log($"Card removed from Drop Zone: {cardToRemove.name}");
             Debug.Log($"Card added to Graveyard: {cardToRemove.name}");
-
-            dropZoneCards.cardsDropZone.RemoveAt(cardIndex);
+            dropZoneCards.cardsDropZone.RemoveAt(cardIndexSelf);
             cardToRemove.transform.SetParent(graveyard.transform, true);
             Destroy(cardToRemove.gameObject);
             cardToRemove = null;
-        }
 
-        if (effect == "WeakDestroyer") // Destroy in both sides
-        {
-            var toReturn = dropZoneCards.GetTheLowestCard();
-            int cardIndex = toReturn.Item1;
-            cardToRemove = toReturn.Item2;
-
-            cardToRemove.GetComponent<DisplayCard>().CardReset();
-
-            graveyard = GameObject.Find("GraveYard");
-
-            Debug.Log($"Card removed from Drop Zone: {cardToRemove.name}");
-            Debug.Log($"Card added to Graveyard: {cardToRemove.name}");
-
-            dropZoneCards.cardsDropZone.RemoveAt(cardIndex);
-            cardToRemove.transform.SetParent(graveyard.transform, true);
-            Destroy(cardToRemove.gameObject);
-            cardToRemove = null;
+            if (toReturnOpposite.Item2 != null)
+            {
+                cardToRemoveOpposite = toReturnOpposite.Item2;
+                cardToRemoveOpposite.GetComponent<DisplayCard>().CardReset();
+                graveyardOpposite = dropZone.GetComponent<DropZoneConditions>().oppositeDropZone.GetComponent<DropZoneConditions>().graveyard;
+                Debug.Log($"Card removed from Drop Zone: {cardToRemoveOpposite.name}");
+                Debug.Log($"Card added to Graveyard: {cardToRemoveOpposite.name}");
+                oppositeCards.cardsDropZone.RemoveAt(cardIndexOpposite);
+                cardToRemoveOpposite.transform.SetParent(graveyardOpposite.transform, true);
+                Destroy(cardToRemoveOpposite.gameObject);
+                cardToRemoveOpposite = null;
+            }     
         }
 
         if (effect == "Communion")
@@ -100,24 +151,26 @@ public class CardEffect : MonoBehaviour
                 dropZoneCards.PowerUpSpecifiedCard(cardId, timesPowerUp);
         }
 
-        if (effect == "ClearClimate")
-        {
-            dropZoneCards.ResetAllCards();
-        }
-
         if (effect == "Average")
         {
             dropZoneCards.AverageCardsInDropZone();
+            oppositeCards.AverageCardsInDropZone();
         }
 
-        if (effect == "Take")       //Next
+        if (effect == "Take")
         {
-            
+            if (GetComponent<DisplayCard>().cardFaction == 0)
+                hand = GameObject.Find("HandShrek");
+            else
+                hand = GameObject.Find("HandBad");
+
+            hand.GetComponent<Hand>().OnClickTakeFromDeck();
         }
 
-        if (effect == "DestroyLine") //Next
+        if (effect == "DestroyLine")
         {
-
+            dropZoneCards.ClearDropZone(true);
+            oppositeCards.ClearDropZone(true);
         }
     }
 }

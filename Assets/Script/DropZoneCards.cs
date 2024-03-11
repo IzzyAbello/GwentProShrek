@@ -11,6 +11,11 @@ public class DropZoneCards : MonoBehaviour
 
     public int pointsInDropZone;
 
+    public GameObject climateM;
+    public GameObject climateR;
+    public GameObject climateS;
+
+    public GameObject dropZonetoPowerUp;
 
     public void ClearEffectsDropZone ()
     {
@@ -37,15 +42,28 @@ public class DropZoneCards : MonoBehaviour
         }
     }
 
-    public void ClearDropZone()
+    public void ClearDropZone(bool notGold = false) // Graveyard Implementation
     {
         ClearEffectsDropZone();
 
         foreach (Transform child in transform)
         {
-            Destroy(child.gameObject);
+            if (notGold)
+            {
+                if (child.gameObject.GetComponent<DisplayCard>().cardKind != 'g')
+                    Destroy(child.gameObject);
+            }
+            else
+                Destroy(child.gameObject);
         }
-        cardsDropZone.RemoveRange(0, cardsDropZone.Count);
+
+
+        if (notGold)
+        {
+            cardsDropZone.RemoveAll(card => card.GetComponent<DisplayCard>().cardKind != 'g');
+        }
+        else
+            cardsDropZone.RemoveRange(0, cardsDropZone.Count);
     }
 
 
@@ -72,14 +90,20 @@ public class DropZoneCards : MonoBehaviour
     public void PowerUpDropZone ()
     {
         isPoweredUp = true;
-
-        for (int i = 0; i < cardsDropZone.Count; i++)
+        if (GetComponent<DropZoneConditions>().zone == 'P')
         {
-            DisplayCard card = cardsDropZone[i].GetComponent<DisplayCard>();
-
-            if (!card.isPowerUp && card.displayCard.cardKind != 'g')
+            GetComponent<PowerUpDropZone>().dropZone.GetComponent<DropZoneCards>().PowerUpDropZone();
+        }
+        else
+        {
+            for (int i = 0; i < cardsDropZone.Count; i++)
             {
-                card.CardPowerUp();
+                DisplayCard card = cardsDropZone[i].GetComponent<DisplayCard>();
+
+                if (!card.isPowerUp && card.displayCard.cardKind != 'g')
+                {
+                    card.CardPowerUp();
+                }
             }
         }
     }
@@ -182,19 +206,22 @@ public class DropZoneCards : MonoBehaviour
 
     public void AverageCardsInDropZone()
     {
-        int average = 0;
-        for (int i = 0; i < cardsDropZone.Count; i++)
+        if (cardsDropZone.Count > 0)
         {
-            average += cardsDropZone[i].GetComponent<DisplayCard>().cardPower;
-        }
-        average /= cardsDropZone.Count;
+            int average = 0;
+            for (int i = 0; i < cardsDropZone.Count; i++)
+            {
+                average += cardsDropZone[i].GetComponent<DisplayCard>().cardPower;
+            }
+            average /= cardsDropZone.Count;
 
-        for (int i = 0; i < cardsDropZone.Count; i++)
-        {
-            DisplayCard card = cardsDropZone[i].GetComponent<DisplayCard>();
-            if (card.cardKind != 'g')
-                card.AverageCard(average);
+            for (int i = 0; i < cardsDropZone.Count; i++)
+            {
+                DisplayCard card = cardsDropZone[i].GetComponent<DisplayCard>();
+                if (card.cardKind != 'g')
+                    card.AverageCard(average);
 
+            }
         }
     }
 
@@ -204,7 +231,8 @@ public class DropZoneCards : MonoBehaviour
 
         for (int i = 0; i < cardsDropZone.Count; i++)
         {
-            aux += cardsDropZone[i].GetComponent<DisplayCard>().cardPower;
+            if (cardsDropZone[i] != null)
+                aux += cardsDropZone[i].GetComponent<DisplayCard>().cardPower;
         }
         pointsInDropZone = aux;
     }
