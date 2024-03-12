@@ -10,7 +10,7 @@ public class CanPlayCard : MonoBehaviour
         DropZoneConditions conditions = dropZone.GetComponent<DropZoneConditions>();
         DropZoneCards dropZoneCards = dropZone.GetComponent<DropZoneCards>();
         int count = dropZone.GetComponent<DropZoneCards>().cardsDropZone.Count;
-        
+
         if (conditions.zone == 'C' && conditions.zone == card.cardZone)
         {
             bool canPlayClimateCard = true;

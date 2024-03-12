@@ -35,7 +35,7 @@ public class DropZoneCards : MonoBehaviour
             isUnderClimateEffect = false;
             DisplayCard card = cardsDropZone[i].GetComponent<DisplayCard>();
             card.CardReset();
-            if (isPoweredUp)
+            if (isPoweredUp && card.cardKind != 'g')
                 card.CardPowerUp();
             if (card.cardEffect == "Communion")
                 CommunionActivation();
@@ -44,7 +44,8 @@ public class DropZoneCards : MonoBehaviour
 
     public void ClearDropZone(bool notGold = false) // Graveyard Implementation
     {
-        ClearEffectsDropZone();
+        if (!notGold)
+            ClearEffectsDropZone();
 
         foreach (Transform child in transform)
         {

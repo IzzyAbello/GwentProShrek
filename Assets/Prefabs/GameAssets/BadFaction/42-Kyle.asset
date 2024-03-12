@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8e3060ff70cbc44bb84abcd7614066a, type: 3}
+  m_Name: 42-Kyle
+  m_EditorClassIdentifier: 
+  cardId: 42
+  cardFaction: 1
+  cardPower: 2
+  cardPowerOG: 2
+  cardName: Kyle
+  cardDescription: "Kyle te arreglar\xE1"
+  cardCommunion: None
+  cardKind: 115
+  cardZone: 83
+  cardEffect: None
+  cardSprite: {fileID: 21300000, guid: 0500ae8a86a64d34d91ce3467c690a91, type: 3}

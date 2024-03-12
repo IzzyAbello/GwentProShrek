@@ -58,8 +58,6 @@ public class DragDrop : MonoBehaviour
 
         if (isOverDropZone)
         {
-
-
             transform.SetParent(dropZone.transform, false);
 
             if (startParent != dropZone)

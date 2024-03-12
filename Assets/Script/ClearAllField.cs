@@ -14,6 +14,7 @@ public class ClearAllField : MonoBehaviour
         for (int i = 0; i < AllDropZones.Count; i++)
         {
             AllDropZones[i].GetComponent<DropZoneCards>().ClearDropZone();
+            AllDropZones[i].GetComponent<DropZoneConditions>().oppositeDropZone.GetComponent<DropZoneCards>().ClearDropZone();
         }
     }
 
@@ -21,9 +22,13 @@ public class ClearAllField : MonoBehaviour
     {
         for (int i = 0; i < AllDropZones.Count; i++)
         {
-            if (AllDropZones[i].GetComponent<DropZoneConditions>().zone == 'C')
-                AllDropZones[i].GetComponent<DropZoneCards>().ClearDropZone();
-            AllDropZones[i].GetComponent<DropZoneCards>().ResetAllCards();
+            DropZoneCards dropZone = AllDropZones[i].GetComponent<DropZoneCards>();
+            DropZoneConditions dropZoneConditions = AllDropZones[i].GetComponent<DropZoneConditions>();
+
+            if (dropZoneConditions.zone == 'C')
+                dropZone.ClearDropZone();
+            dropZone.ResetAllCards();
+            dropZoneConditions.oppositeDropZone.GetComponent<DropZoneCards>().ResetAllCards();
         }
     }
 }

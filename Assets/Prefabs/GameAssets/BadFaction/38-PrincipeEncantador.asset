@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8e3060ff70cbc44bb84abcd7614066a, type: 3}
+  m_Name: 38-PrincipeEncantador
+  m_EditorClassIdentifier: 
+  cardId: 38
+  cardFaction: 1
+  cardPower: 8
+  cardPowerOG: 8
+  cardName: "Pr\xEDncipe Encantador"
+  cardDescription: "De lo \xFAnico que ser\xE1s Rey es del reino de los est\xFApidos"
+  cardCommunion: None
+  cardKind: 103
+  cardZone: 77
+  cardEffect: None
+  cardSprite: {fileID: 21300000, guid: eab4ab6e1cc63a14aa3b80ce54d0d96b, type: 3}

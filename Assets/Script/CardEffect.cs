@@ -36,39 +36,42 @@ public class CardEffect : MonoBehaviour
 
         if (effect == "Climate" || dropZone.GetComponent<DropZoneCards>().isUnderClimateEffect)
         {
-            string climateType = GetComponent<DisplayCard>().cardCommunion;
-            DropZoneCards climateZone = dropZone.GetComponent<DropZoneCards>();
-            climateZone.climateS = dropZoneCards.climateS;
-            climateZone.climateR = dropZoneCards.climateR;
-            climateZone.climateM = dropZoneCards.climateM;
+            if (GetComponent<DisplayCard>().cardKind != 'g')
+            {
+                string climateType = GetComponent<DisplayCard>().cardCommunion;
+                DropZoneCards climateZone = dropZone.GetComponent<DropZoneCards>();
+                climateZone.climateS = dropZoneCards.climateS;
+                climateZone.climateR = dropZoneCards.climateR;
+                climateZone.climateM = dropZoneCards.climateM;
 
-            if (effect != "Climate")
-            {
-                GetComponent<DisplayCard>().CardUnderClimateEffect();
-            }
-            else
-            {
-                if (climateType == "Rain")
+                if (effect != "Climate")
                 {
-                    climateZone.climateS.GetComponent<DropZoneCards>().ClimateEffectDropZone();
-                    climateZone.climateS.GetComponent<DropZoneConditions>().oppositeDropZone.GetComponent<DropZoneCards>().ClimateEffectDropZone();
+                    GetComponent<DisplayCard>().CardUnderClimateEffect();
                 }
-                    
-                if (climateType == "Wind")
+                else
                 {
-                    climateZone.climateR.GetComponent<DropZoneCards>().ClimateEffectDropZone();
-                    climateZone.climateR.GetComponent<DropZoneConditions>().oppositeDropZone.GetComponent<DropZoneCards>().ClimateEffectDropZone();
-                }
-                    
-                if (climateType == "Snow")
-                {
-                    climateZone.climateM.GetComponent<DropZoneCards>().ClimateEffectDropZone();
-                    climateZone.climateR.GetComponent<DropZoneConditions>().oppositeDropZone.GetComponent<DropZoneCards>().ClimateEffectDropZone();
-                }
-                if (climateType == "ClearClimate") //Through GameMaster
-                {
-                    GameObject clear = GameObject.Find("Clear");
-                    clear.GetComponent<ClearAllField>().ClearClimate();
+                    if (climateType == "Rain")
+                    {
+                        climateZone.climateS.GetComponent<DropZoneCards>().ClimateEffectDropZone();
+                        climateZone.climateS.GetComponent<DropZoneConditions>().oppositeDropZone.GetComponent<DropZoneCards>().ClimateEffectDropZone();
+                    }
+
+                    if (climateType == "Wind")
+                    {
+                        climateZone.climateR.GetComponent<DropZoneCards>().ClimateEffectDropZone();
+                        climateZone.climateR.GetComponent<DropZoneConditions>().oppositeDropZone.GetComponent<DropZoneCards>().ClimateEffectDropZone();
+                    }
+
+                    if (climateType == "Snow")
+                    {
+                        climateZone.climateM.GetComponent<DropZoneCards>().ClimateEffectDropZone();
+                        climateZone.climateM.GetComponent<DropZoneConditions>().oppositeDropZone.GetComponent<DropZoneCards>().ClimateEffectDropZone();
+                    }
+                    if (climateType == "ClearClimate") //Through GameMaster
+                    {
+                        GameObject clear = GameObject.Find("Clear");
+                        clear.GetComponent<ClearAllField>().ClearClimate();
+                    }
                 }
             }
         }

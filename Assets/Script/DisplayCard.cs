@@ -31,6 +31,10 @@ public class DisplayCard : MonoBehaviour
     public TextMeshProUGUI powerText;
     public TextMeshProUGUI descriptionText;
 
+    public Image nameBorder;
+    public Image descriptionBorder;
+    public Image cardBorder;
+    public Image cardKindImage;
     public Image cardImage;
     public Image effectImage;
     public Image zoneImage;
@@ -83,7 +87,29 @@ public class DisplayCard : MonoBehaviour
     {
         Sprite aux; // Miss... ...
 
+        if (cardFaction != 0)
+        {
+            nameBorder.color = Color.red;
+            descriptionBorder.color = Color.red;
+            cardBorder.color = Color.red;
+        }
+        if (cardZone == 'C')
+        {
+            nameBorder.color = Color.blue;
+            descriptionBorder.color = Color.blue;
+            cardBorder.color = Color.blue;
+        }
 
+
+        if (cardPower == 0)
+        {
+            cardKindImage.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Resources/NULL_IMAGE.png");
+            powerText.text = "";
+        }
+        if (cardKind == 'g')
+        {
+            cardKindImage.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Resources/REAL_GOLDpng.png");
+        }
         if (cardZone == 'M')
         {
             zoneImage.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Resources/MMM.png");
