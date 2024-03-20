@@ -11,6 +11,7 @@ public class GetPoints : MonoBehaviour
     public DropZoneCards dropZoneR;
     public DropZoneCards dropZoneS;
 
+    public int points;
 
     void Update()
     {
@@ -18,6 +19,8 @@ public class GetPoints : MonoBehaviour
         dropZoneR.GetPoints();
         dropZoneS.GetPoints();
 
-        pointsText.text = (dropZoneM.pointsInDropZone + dropZoneR.pointsInDropZone + dropZoneS.pointsInDropZone).ToString();
+        points = dropZoneM.pointsInDropZone + dropZoneR.pointsInDropZone + dropZoneS.pointsInDropZone;
+
+        pointsText.text = points.ToString();
     }
 }

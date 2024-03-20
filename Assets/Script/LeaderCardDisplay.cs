@@ -21,6 +21,28 @@ public class LeaderCardDisplay : MonoBehaviour
 
     public Image cardImage;
 
+    public Image nameBorder;
+    public Image nameBorderBorder;
+    public Image descriptionBorder;
+    public Image cardBorder;
+    public Image upBorder;
+    public Image downBorder;
+
+    public void SetImages ()
+    {
+        if (cardFaction != 0)
+        {
+            nameBorder.color = Color.red;
+            nameBorderBorder.color = Color.red;
+            descriptionBorder.color = Color.red;
+            cardBorder.color = Color.red;
+            upBorder.color = Color.red;
+            downBorder.color = Color.red;
+        }
+    }
+
+
+
     private void Start()
     {
         cardId = leaderCard.cardId;
@@ -32,6 +54,8 @@ public class LeaderCardDisplay : MonoBehaviour
         nameText.text = cardName;
         descriptionText.text = cardDescription;
         cardImage.sprite = cardSprite;
+
+        SetImages();
     }
 
 }

@@ -44,6 +44,9 @@ public class DropZoneCards : MonoBehaviour
 
     public void ClearDropZone(bool notGold = false) // Graveyard Implementation
     {
+        Graveyard graveyardCards = GetComponent<DropZoneConditions>().graveyard.GetComponent<Graveyard>();
+
+
         if (!notGold)
             ClearEffectsDropZone();
 
@@ -52,10 +55,18 @@ public class DropZoneCards : MonoBehaviour
             if (notGold)
             {
                 if (child.gameObject.GetComponent<DisplayCard>().cardKind != 'g')
+                {
+                    graveyardCards.cardsGraveyard.Add(child.gameObject);
                     Destroy(child.gameObject);
+                }
+                    
             }
             else
+            {
+                graveyardCards.cardsGraveyard.Add(child.gameObject);
                 Destroy(child.gameObject);
+            }
+                
         }
 
 

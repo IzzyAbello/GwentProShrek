@@ -81,6 +81,7 @@
     <Compile Include="Assets\Script\LeaderCardDisplay.cs" />
     <Compile Include="Assets\Script\LeaderEffect.cs" />
     <Compile Include="Assets\Script\PowerUpDropZone.cs" />
+    <Compile Include="Assets\Script\SwitchTurn.cs" />
     <Compile Include="Assets\Script\ZoomCard.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark01.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark01_UGUI.cs" />
