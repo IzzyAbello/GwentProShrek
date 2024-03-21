@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using TMPro;
 public class SwitchTurn : MonoBehaviour
 {
     bool shrekStarts = true;
@@ -13,6 +13,8 @@ public class SwitchTurn : MonoBehaviour
     public GameObject pointsShrek;
     public GameObject pointsBad;
 
+    public TextMeshProUGUI toRoundImage;
+
     Vector2 playPositionHand;
     Vector2 outSidePositionHand;
 
@@ -20,6 +22,11 @@ public class SwitchTurn : MonoBehaviour
     Vector2 outSidePositionLeader;
 
     public int turn = 1;
+    public int round = 1;
+
+    int livesShrek = 2;
+    int livesBad = 2;
+
 
     private void Start()
     {
@@ -42,8 +49,20 @@ public class SwitchTurn : MonoBehaviour
 
     public void OnClickSwitchTurn ()
     {
+        if (turn == 1)
+        {
+            GameObject button = GameObject.Find("StartGameButton");
+
+            button.transform.position = button.GetComponent<StartButton>().pos;
+        }
+
         if (turn % 2 == 0)
         {
+            round++;
+            
+            if (round < 4)
+                toRoundImage.text = round.ToString();
+
             GameObject liveToRemove;
             GameObject clear = GameObject.Find("Clear");
 
@@ -65,6 +84,8 @@ public class SwitchTurn : MonoBehaviour
                     break;
                 }
 
+                livesShrek--;
+
                 shrekStarts = true;
             }
             else if (turnPointsShrek < turnPointsBad)
@@ -78,6 +99,8 @@ public class SwitchTurn : MonoBehaviour
                     Destroy(child.gameObject);
                     break;
                 }
+
+                livesBad--;
 
                 shrekStarts = false;
             }
@@ -100,6 +123,9 @@ public class SwitchTurn : MonoBehaviour
                     Destroy(child.gameObject);
                     break;
                 }
+
+                livesShrek--;
+                livesBad--;
 
                 turn += 2;
             }
@@ -131,6 +157,14 @@ public class SwitchTurn : MonoBehaviour
                 shrekStarts = true;
             }
 
+            if (livesShrek == 0)
+            {
+                Debug.Log("Farquaad gana");
+            }
+            if (livesBad == 0)
+            {
+                Debug.Log("Shrek gana");
+            }
 
             turn++;
         }

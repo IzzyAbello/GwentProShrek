@@ -78,25 +78,7 @@ public class CardEffect : MonoBehaviour
 
         if (effect == "Decoy")
         {
-            var toReturn = dropZoneCards.GetTheHighestCard();
-            int cardIndex = toReturn.Item1;
-            cardToRemove = toReturn.Item2;
-
-
-            if (GetComponent<DisplayCard>().cardFaction == 0)
-                hand = GameObject.Find("HandShrek");
-            else
-                hand = GameObject.Find("HandBad");
-
-            cardToRemove.GetComponent<DisplayCard>().CardReset();
-
-
-            Debug.Log($"Card removed from Drop Zone: {cardToRemove.name}");
-            Debug.Log($"Card added to Hand: {cardToRemove.name}");
-
-            dropZoneCards.cardsDropZone.RemoveAt(cardIndex);
-            cardToRemove.transform.SetParent(hand.transform, true);
-            cardToRemove = null;
+            dropZoneCards.isDecoy = true;
         }
 
         if (effect == "Destroyer" || effect == "WeakDestroyer")

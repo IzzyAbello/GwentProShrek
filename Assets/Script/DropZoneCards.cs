@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class DropZoneCards : MonoBehaviour
 {
+    public bool isDecoy = false;
+
     public List<GameObject> cardsDropZone = new List<GameObject>();
     public bool isPoweredUp = false;
     public bool isUnderClimateEffect = false;
@@ -203,6 +205,32 @@ public class DropZoneCards : MonoBehaviour
         var ans = (cardIndex, getCard);
 
         return ans;
+    }
+
+
+    public int GetSpecifiedCard (int id)
+    {
+        for (int i = 0; i < cardsDropZone.Count; i++)
+        {
+            if (cardsDropZone[i].GetComponent<DisplayCard>().cardId == id)
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public GameObject GetSpecifiedCardDecoy()
+    {
+        for (int i = 0; i < cardsDropZone.Count; i++)
+        {
+            if (cardsDropZone[i].GetComponent<Decoy>().isSelected)
+            {
+                cardsDropZone[i].GetComponent<Decoy>().isSelected = false;
+                return cardsDropZone[i];
+            }
+        }
+        return null;
     }
 
     public int GetCountOfSpecifiedCard (string id)

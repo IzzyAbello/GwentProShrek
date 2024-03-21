@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class Hand : MonoBehaviour
 {
+    int changeCards = 0;
+
+    public bool isFirstRound = true;
+
+    public bool canChangeCard = true;
 
     public List<GameObject> hand = new List<GameObject>();
 
@@ -12,6 +17,7 @@ public class Hand : MonoBehaviour
 
     public Deck deck;
     public Graveyard graveyard;
+
 
     public void RemoveFromHand(GameObject cardToRemove)
     {
@@ -27,12 +33,26 @@ public class Hand : MonoBehaviour
                 hand.RemoveAt(i);
             }
         }
+
+        foreach (Transform child in transform)
+        {
+            if (child.GetComponent<DisplayCard>().cardId == cardToRemove.GetComponent<DisplayCard>().cardId)
+            {
+                changeCards++;
+                Destroy(child.gameObject);
+                break;
+            }
+        }
+        if (changeCards == 2)
+        {
+            GameObject button = GameObject.Find("StartGameButton");
+            button.GetComponent<StartButton>().OnClickStart();
+            isFirstRound = false;
+        }
     }
 
-    public void OnClickTakeFromDeck()
+    public void OnClickTakeFromDeck(int n = 1)
     {
-        int n = 1;
-
         int size = hand.Count;
 
         for (int i = size; i < size + n; i++)
@@ -51,5 +71,10 @@ public class Hand : MonoBehaviour
             Debug.Log($"Card {i}: {hand[i].gameObject.name}");
         }
 
+    }
+
+    private void Start()
+    {
+        OnClickTakeFromDeck(10);
     }
 }

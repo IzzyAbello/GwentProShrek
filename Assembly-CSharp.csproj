@@ -68,6 +68,7 @@
     <Compile Include="Assets\Script\CardCountManager.cs" />
     <Compile Include="Assets\Script\CardCountManagerHand.cs" />
     <Compile Include="Assets\Script\CardEffect.cs" />
+    <Compile Include="Assets\Script\ChangeCards.cs" />
     <Compile Include="Assets\Script\ClearAllField.cs" />
     <Compile Include="Assets\Script\Deck.cs" />
     <Compile Include="Assets\Script\Decoy.cs" />
@@ -81,6 +82,7 @@
     <Compile Include="Assets\Script\LeaderCardDisplay.cs" />
     <Compile Include="Assets\Script\LeaderEffect.cs" />
     <Compile Include="Assets\Script\PowerUpDropZone.cs" />
+    <Compile Include="Assets\Script\StartButton.cs" />
     <Compile Include="Assets\Script\SwitchTurn.cs" />
     <Compile Include="Assets\Script\ZoomCard.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark01.cs" />
