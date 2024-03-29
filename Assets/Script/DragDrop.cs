@@ -62,6 +62,9 @@ public class DragDrop : MonoBehaviour
 
             if (startParent != dropZone)
             {
+                GameObject button = GameObject.Find("PlayTurnButton");
+                GameObject hand = startParent;
+
                 startParent = dropZone;
 
                 dropZone.GetComponent<DropZoneCards>().cardsDropZone.Add(gameObject);
@@ -72,6 +75,12 @@ public class DragDrop : MonoBehaviour
 
                 Debug.Log($"Card removed from Hand: {gameObject.name}");
                 Debug.Log($"Card added to Drop Zone: {gameObject.name}");
+
+                if (!hand.GetComponent<Hand>().isPass)
+                {
+                    if (GetComponent<DisplayCard>().cardEffect != "Decoy")
+                        button.GetComponent<SwitchTurn>().SwitchTurnPlayer(hand);
+                }
             }
         }
         else

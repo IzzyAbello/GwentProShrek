@@ -7,7 +7,7 @@ public class Hand : MonoBehaviour
     int changeCards = 0;
 
     public bool isFirstRound = true;
-
+    public bool isPass = false;
     public bool canChangeCard = true;
 
     public List<GameObject> hand = new List<GameObject>();
@@ -54,14 +54,16 @@ public class Hand : MonoBehaviour
     public void OnClickTakeFromDeck(int n = 1)
     {
         int size = hand.Count;
-
         for (int i = size; i < size + n; i++)
         {
-            hand.Add(deck.deck[0]);
-            Debug.Log($"Card added to hand: {hand[hand.Count - 1].name}");
+            if (size <= 10)
+            {
+                hand.Add(deck.deck[0]);
+                Debug.Log($"Card added to hand: {hand[hand.Count - 1].name}");
+                GameObject playerCard = Instantiate(hand[i], new Vector3(0, 0, 0), Quaternion.identity);
+                playerCard.transform.SetParent(playerHand.transform, false);
+            }
             deck.RemoveFromDeck(1);
-            GameObject playerCard = Instantiate(hand[i], new Vector3(0, 0, 0), Quaternion.identity);
-            playerCard.transform.SetParent(playerHand.transform, false);
         }
 
         Debug.Log("Cards in hand: ");
@@ -70,7 +72,6 @@ public class Hand : MonoBehaviour
             hand[i].GetComponent<DisplayCard>().CardReset();
             Debug.Log($"Card {i}: {hand[i].gameObject.name}");
         }
-
     }
 
     private void Start()

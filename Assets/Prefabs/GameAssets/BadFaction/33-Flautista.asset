@@ -20,6 +20,6 @@ MonoBehaviour:
   cardDescription: '*Pone la flauta en modo ogros'
   cardCommunion: None
   cardKind: 115
-  cardZone: 82
-  cardEffect: None
+  cardZone: 83
+  cardEffect: Average
   cardSprite: {fileID: 21300000, guid: dc97f531c5f48ea4dad073dc29c6f753, type: 3}

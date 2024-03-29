@@ -4,14 +4,14 @@ using UnityEngine;
 using TMPro;
 public class SwitchTurn : MonoBehaviour
 {
-    bool shrekStarts = true;
-
     public GameObject handShrek;
     public GameObject handBad;
     public GameObject leaderShrek;
     public GameObject leaderBad;
     public GameObject pointsShrek;
     public GameObject pointsBad;
+    public GameObject button;
+
 
     public TextMeshProUGUI toRoundImage;
 
@@ -21,8 +21,8 @@ public class SwitchTurn : MonoBehaviour
     Vector2 playPositionLeader;
     Vector2 outSidePositionLeader;
 
-    public int turn = 1;
     public int round = 1;
+
 
     int livesShrek = 2;
     int livesBad = 2;
@@ -44,129 +44,113 @@ public class SwitchTurn : MonoBehaviour
         outSidePositionLeader = new Vector2 (xxx2, yyy);
     }
 
-
-
-
-    public void OnClickSwitchTurn ()
+    public void SwitchTurnPlayer (GameObject playerHand)
     {
-        if (turn == 1)
+        if (playerHand == handShrek)
         {
-            GameObject button = GameObject.Find("StartGameButton");
+            handShrek.transform.position = outSidePositionHand;
+            leaderShrek.transform.position = outSidePositionLeader;
 
-            button.transform.position = button.GetComponent<StartButton>().pos;
-        }
+            handBad.transform.position = playPositionHand;
+            leaderBad.transform.position = playPositionLeader;
 
-        if (turn % 2 == 0)
-        {
-            round++;
-            
-            if (round < 4)
-                toRoundImage.text = round.ToString();
-
-            GameObject liveToRemove;
-            GameObject clear = GameObject.Find("Clear");
-
-            ClearAllField clearAll = clear.GetComponent<ClearAllField>();
-
-            int turnPointsShrek = pointsShrek.GetComponent<GetPoints>().points;
-            int turnPointsBad = pointsBad.GetComponent<GetPoints>().points;
-
-
-            if (turnPointsShrek > turnPointsBad)
+            if (handBad.GetComponent<Hand>().isFirstRound)
             {
-                Debug.Log("Shrek wins the round...");
-
-                liveToRemove = GameObject.Find("LiveBorderBad");
-
-                foreach (Transform child in liveToRemove.transform)
-                {
-                    Destroy(child.gameObject);
-                    break;
-                }
-
-                livesShrek--;
-
-                shrekStarts = true;
+                button = GameObject.Find("StartGameButton");
+                button.transform.position = button.GetComponent<StartButton>().boardPosition;
             }
-            else if (turnPointsShrek < turnPointsBad)
+        }
+        else
+        {
+            handBad.transform.position = outSidePositionHand;
+            leaderBad.transform.position = outSidePositionLeader;
+
+            handShrek.transform.position = playPositionHand;
+            leaderShrek.transform.position = playPositionLeader;
+        }
+    }
+
+
+    public void OnClickPass ()
+    {
+        Hand inHandShrek = handShrek.GetComponent<Hand>();
+        Hand inHandBad = handBad.GetComponent<Hand>();
+        Vector3 aux = new Vector3(playPositionHand.x, playPositionHand.y);
+        GameObject hand = (handShrek.transform.position == aux) ? handShrek : handBad;
+        Hand inHand = hand.GetComponent<Hand>();        
+        inHand.isPass = true;
+
+        if (inHandShrek.isPass && inHandBad.isPass)
+        {
+            GameObject looser = handShrek;
+            inHandShrek.isPass = false;
+            inHandBad.isPass = false;
+
+            GetPoints inPointsShrek = pointsShrek.GetComponent<GetPoints>();
+            GetPoints inPointsBad = pointsBad.GetComponent<GetPoints>();
+
+            GameObject livesToDestroy = GameObject.Find("LiveBorderShrek");
+
+            if (inPointsShrek.points >= inPointsBad.points)
             {
-                Debug.Log("Farquaad wins the round...");
-
-                liveToRemove = GameObject.Find("LiveBorderShrek");
-
-                foreach (Transform child in liveToRemove.transform)
-                {
-                    Destroy(child.gameObject);
-                    break;
-                }
-
+                looser = handBad;
+                livesToDestroy = GameObject.Find("LiveBorderBad");
                 livesBad--;
-
-                shrekStarts = false;
             }
             else
             {
-                Debug.Log("Draw...");
-
-                liveToRemove = GameObject.Find("LiveBorderBad");
-
-                foreach (Transform child in liveToRemove.transform)
-                {
-                    Destroy(child.gameObject);
-                    break;
-                }
-
-                liveToRemove = GameObject.Find("LiveBorderShrek");
-
-                foreach (Transform child in liveToRemove.transform)
-                {
-                    Destroy(child.gameObject);
-                    break;
-                }
-
                 livesShrek--;
-                livesBad--;
-
-                turn += 2;
             }
+            DestroyLives(livesToDestroy);
 
-
-            clearAll.Clear();
-        }
-
-        if (turn <= 5)
-        {
-            if (shrekStarts && turn != 1)
-            {
-                handShrek.transform.position = playPositionHand;
-                leaderShrek.transform.position = playPositionLeader;
-
-                handBad.transform.position = outSidePositionHand;
-                leaderBad.transform.position = outSidePositionLeader;
-                
-                shrekStarts = false;
-            }
-            else
-            {
-                handBad.transform.position = playPositionHand;
-                leaderBad.transform.position = playPositionLeader;
-
-                handShrek.transform.position = outSidePositionHand;
-                leaderShrek.transform.position = outSidePositionLeader;
-
-                shrekStarts = true;
-            }
+            GameObject gameOver = GameObject.Find("GameOver");
+            GameOverButton inGameOver = gameOver.GetComponent<GameOverButton>();
 
             if (livesShrek == 0)
             {
-                Debug.Log("Farquaad gana");
+                inGameOver.ChangePosition("Lord Farquaad WINS");
             }
-            if (livesBad == 0)
+            else if (livesBad == 0)
             {
-                Debug.Log("Shrek gana");
+                inGameOver.ChangePosition("Shrek WINS");
+            }
+            else
+            {
+                round++;
+                toRoundImage.text = round.ToString();
+                if (looser.transform.position == aux)
+                {
+                    SwitchTurnPlayer(looser);
+                }
+                inHandShrek.OnClickTakeFromDeck(2);
+                inHandBad.OnClickTakeFromDeck(2);
+            }
+        }
+        else
+        {
+            if (hand == handShrek)
+            {
+                inHandBad.isPass = true;
+            }
+            else
+            {
+                inHandShrek.isPass = true;
             }
 
-            turn++;
+            SwitchTurnPlayer(hand);
         }
     }
+
+
+    public void DestroyLives(GameObject liveBorder)
+    {
+        GameObject.Find("Clear").GetComponent<ClearAllField>().Clear();
+
+        foreach (Transform child in liveBorder.transform)
+        {
+            Destroy(child.gameObject);
+            break;
+        }
+    }
+
 }

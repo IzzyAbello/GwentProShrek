@@ -20,6 +20,6 @@ MonoBehaviour:
   cardDescription: Mosqueteeeeros
   cardCommunion: None
   cardKind: 115
-  cardZone: 77
+  cardZone: 82
   cardEffect: None
   cardSprite: {fileID: 21300000, guid: 19a898ad777127648a36170b0658d41c, type: 3}

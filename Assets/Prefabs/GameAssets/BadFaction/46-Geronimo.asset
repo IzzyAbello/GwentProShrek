@@ -20,6 +20,6 @@ MonoBehaviour:
   cardDescription: El Hada Madrina no se encuentra...
   cardCommunion: None
   cardKind: 115
-  cardZone: 82
+  cardZone: 83
   cardEffect: None
   cardSprite: {fileID: 21300000, guid: f660b5134c606bc4fa9315de02d2950c, type: 3}

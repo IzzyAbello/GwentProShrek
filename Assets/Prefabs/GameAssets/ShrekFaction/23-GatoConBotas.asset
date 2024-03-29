@@ -21,6 +21,6 @@ MonoBehaviour:
     le regala su semillita..."
   cardCommunion: None
   cardKind: 103
-  cardZone: 77
+  cardZone: 83
   cardEffect: DestroyLine
   cardSprite: {fileID: 21300000, guid: 745b7aed830d8d74faace64a5fa65f1e, type: 3}

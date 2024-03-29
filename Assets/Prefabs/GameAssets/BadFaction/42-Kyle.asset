@@ -20,6 +20,6 @@ MonoBehaviour:
   cardDescription: "Kyle te arreglar\xE1"
   cardCommunion: None
   cardKind: 115
-  cardZone: 83
-  cardEffect: None
+  cardZone: 77
+  cardEffect: PowerUp
   cardSprite: {fileID: 21300000, guid: 0500ae8a86a64d34d91ce3467c690a91, type: 3}

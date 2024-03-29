@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardId: 45
   cardFaction: 1
-  cardPower: 6
-  cardPowerOG: 6
+  cardPower: 5
+  cardPowerOG: 5
   cardName: "\xC1rboles Malvados"
   cardDescription: "Tienes raz\xF3n Abeto"
-  cardCommunion: None
+  cardCommunion: Bar
   cardKind: 115
-  cardZone: 83
-  cardEffect: None
+  cardZone: 82
+  cardEffect: Communion
   cardSprite: {fileID: 21300000, guid: 53d555b6013525a4e897c4981b391c0e, type: 3}

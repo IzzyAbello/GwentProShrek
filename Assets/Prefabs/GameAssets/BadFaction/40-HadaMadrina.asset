@@ -20,6 +20,6 @@ MonoBehaviour:
   cardDescription: Te dije que los ogros no pueden ser felices para siempre!!!
   cardCommunion: None
   cardKind: 103
-  cardZone: 77
+  cardZone: 83
   cardEffect: None
   cardSprite: {fileID: 21300000, guid: 5b33f32a7e5f6e844b1a7c50994ad14f, type: 3}

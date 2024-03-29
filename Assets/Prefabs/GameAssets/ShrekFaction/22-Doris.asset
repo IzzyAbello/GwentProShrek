@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardId: 22
   cardFaction: 0
-  cardPower: 9
-  cardPowerOG: 9
+  cardPower: 5
+  cardPowerOG: 5
   cardName: "La hermanastra m\xE1s fea"
   cardDescription: "Bromeas? Es un papucho, su cara parece tallada por los mismos
     \xE1ngeles..."

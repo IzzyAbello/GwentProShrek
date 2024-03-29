@@ -38,7 +38,7 @@ public class Deck : MonoBehaviour
         Debug.Log("Creating Deck...\n");
 
 
-        //deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/GoodFaction/Special/DespejeShrek1Card.prefab")); Template
+        //deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/BadFaction/Special/AumentoBadCard.prefab")); Template
 
         if (deckFaction == 0)
         {
@@ -79,6 +79,8 @@ public class Deck : MonoBehaviour
             deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/GoodFaction/Special/VientoShrekCard.prefab"));
             deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/GoodFaction/Special/DespejeShrek1Card.prefab"));
             deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/GoodFaction/Special/DespejeShrek2Card.prefab"));
+
+            deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/GoodFaction/Special/AumentoCard.prefab"));
         }
 
 
@@ -117,6 +119,8 @@ public class Deck : MonoBehaviour
             deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/BadFaction/Special/NieveBadCard.prefab"));
             deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/BadFaction/Special/DespejeBad1Card.prefab"));
             deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/BadFaction/Special/DespejeBad2Card.prefab"));
+
+            deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/BadFaction/Special/AumentoBadCard.prefab"));
         }
 
         Debug.Log($"Deck full size: {deck.Count}");

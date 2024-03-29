@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardId: 43
   cardFaction: 1
-  cardPower: 8
-  cardPowerOG: 8
+  cardPower: 5
+  cardPowerOG: 5
   cardName: "C\xEDclope"
   cardDescription: Mi hija queria verte...
-  cardCommunion: None
+  cardCommunion: Bar
   cardKind: 115
-  cardZone: 83
-  cardEffect: None
+  cardZone: 82
+  cardEffect: Communion
   cardSprite: {fileID: 21300000, guid: 33e0e57c579842e4e8f1ca96ac780752, type: 3}

@@ -20,6 +20,6 @@ MonoBehaviour:
   cardDescription: "De lo \xFAnico que ser\xE1s Rey es del reino de los est\xFApidos"
   cardCommunion: None
   cardKind: 103
-  cardZone: 77
+  cardZone: 82
   cardEffect: None
   cardSprite: {fileID: 21300000, guid: eab4ab6e1cc63a14aa3b80ce54d0d96b, type: 3}

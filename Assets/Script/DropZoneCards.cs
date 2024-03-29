@@ -21,6 +21,7 @@ public class DropZoneCards : MonoBehaviour
 
     public void ClearEffectsDropZone ()
     {
+        isDecoy = false;
         isPoweredUp = false;
         isUnderClimateEffect = false;
 

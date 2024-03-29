@@ -16,8 +16,8 @@ MonoBehaviour:
   cardFaction: 1
   cardPower: 0
   cardPowerOG: 0
-  cardName: Decoy
-  cardDescription: Un sennuelo
+  cardName: "Se\xF1uelo"
+  cardDescription: "Un Se\xF1uelo"
   cardCommunion: None
   cardKind: 115
   cardZone: 83

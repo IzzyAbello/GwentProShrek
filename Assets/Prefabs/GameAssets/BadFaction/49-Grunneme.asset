@@ -20,6 +20,6 @@ MonoBehaviour:
   cardDescription: "Gr\xFA\xF1eme!!!"
   cardCommunion: None
   cardKind: 115
-  cardZone: 82
-  cardEffect: None
+  cardZone: 77
+  cardEffect: WeakDestroyer
   cardSprite: {fileID: 21300000, guid: 5b55c62503abe3e4291b3418c68b615c, type: 3}

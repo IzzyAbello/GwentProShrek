@@ -20,6 +20,6 @@ MonoBehaviour:
   cardDescription: Entra Harold
   cardCommunion: None
   cardKind: 115
-  cardZone: 77
+  cardZone: 83
   cardEffect: None
   cardSprite: {fileID: 21300000, guid: a0d81e021aa03104fa26835f35f1ae99, type: 3}

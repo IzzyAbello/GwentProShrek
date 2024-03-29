@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardId: 14
   cardFaction: 0
-  cardPower: 4
-  cardPowerOG: 4
+  cardPower: 2
+  cardPowerOG: 2
   cardName: Jenji
   cardDescription: No mis botones de gomita :'(
   cardCommunion: None

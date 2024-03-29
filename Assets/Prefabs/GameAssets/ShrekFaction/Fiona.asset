@@ -20,6 +20,6 @@ MonoBehaviour:
   cardDescription: Te comistes a la princesa!!! :0
   cardCommunion: None
   cardKind: 103
-  cardZone: 77
+  cardZone: 82
   cardEffect: None
   cardSprite: {fileID: 21300000, guid: afbf275c0f99c2943bd3846e7f78919c, type: 3}

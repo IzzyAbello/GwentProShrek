@@ -20,6 +20,6 @@ MonoBehaviour:
   cardDescription: Aaaaah!!!
   cardCommunion: None
   cardKind: 115
-  cardZone: 82
+  cardZone: 77
   cardEffect: None
   cardSprite: {fileID: 21300000, guid: ade99cdf7f976314aa3b4173c54a663d, type: 3}

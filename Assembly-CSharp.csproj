@@ -76,11 +76,13 @@
     <Compile Include="Assets\Script\DragDrop.cs" />
     <Compile Include="Assets\Script\DropZoneCards.cs" />
     <Compile Include="Assets\Script\DropZoneConditions.cs" />
+    <Compile Include="Assets\Script\GameOverButton.cs" />
     <Compile Include="Assets\Script\GetPoints.cs" />
     <Compile Include="Assets\Script\Graveyard.cs" />
     <Compile Include="Assets\Script\Hand.cs" />
     <Compile Include="Assets\Script\LeaderCardDisplay.cs" />
     <Compile Include="Assets\Script\LeaderEffect.cs" />
+    <Compile Include="Assets\Script\LeaderEffectBad.cs" />
     <Compile Include="Assets\Script\PowerUpDropZone.cs" />
     <Compile Include="Assets\Script\StartButton.cs" />
     <Compile Include="Assets\Script\SwitchTurn.cs" />

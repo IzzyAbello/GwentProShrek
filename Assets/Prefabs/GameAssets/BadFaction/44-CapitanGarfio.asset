@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardId: 44
   cardFaction: 1
-  cardPower: 7
-  cardPowerOG: 7
+  cardPower: 5
+  cardPowerOG: 5
   cardName: Capitan Garfio
   cardDescription: I like my town...
-  cardCommunion: None
+  cardCommunion: Bar
   cardKind: 115
   cardZone: 82
-  cardEffect: None
+  cardEffect: Communion
   cardSprite: {fileID: 21300000, guid: ffe4b522d300e4c4791c7842222e3979, type: 3}

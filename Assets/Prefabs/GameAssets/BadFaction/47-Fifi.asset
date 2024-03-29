@@ -20,6 +20,6 @@ MonoBehaviour:
   cardDescription: fsfjkdhsd
   cardCommunion: None
   cardKind: 115
-  cardZone: 82
-  cardEffect: None
+  cardZone: 83
+  cardEffect: Destroyer
   cardSprite: {fileID: 21300000, guid: cf676657283e31a46b8b82442df895b7, type: 3}

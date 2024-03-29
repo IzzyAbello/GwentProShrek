@@ -41,6 +41,11 @@ public class Decoy : MonoBehaviour
                 cardToRemove.transform.SetParent(hand.transform, true);
 
                 dropZoneCards.isDecoy = false;
+
+                GameObject turnSwitch = GameObject.Find("PlayTurnButton");
+
+                if (!hand.GetComponent<Hand>().isPass)
+                    turnSwitch.GetComponent<SwitchTurn>().SwitchTurnPlayer(hand);
             }
         }
     }

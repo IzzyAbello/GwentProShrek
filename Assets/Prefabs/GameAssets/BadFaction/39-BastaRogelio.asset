@@ -20,6 +20,6 @@ MonoBehaviour:
   cardDescription: '*Lo Golpea con el pergamino...'
   cardCommunion: None
   cardKind: 115
-  cardZone: 83
-  cardEffect: None
+  cardZone: 77
+  cardEffect: Take
   cardSprite: {fileID: 21300000, guid: 5ff76b505102a6e4688cea556e47f9b6, type: 3}

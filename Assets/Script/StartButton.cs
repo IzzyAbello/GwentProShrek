@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class StartButton : MonoBehaviour
 {
-    public Vector2 pos;
+    public Vector2 boardPosition;
 
     private void Start()
     {
-        pos = new Vector2 (transform.position.x, transform.position.y);
+        boardPosition = new Vector2 (transform.position.x, transform.position.y);
     }
 
 
