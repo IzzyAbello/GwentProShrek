@@ -9,12 +9,17 @@ public class DragDrop : MonoBehaviour
     private bool isOverDropZone = false;
     private GameObject dropZone;
     private Vector2 startPosition;
-    private GameObject startParent;
     private GameObject hand;
+    private GameObject startParent;
+    private GameObject audioManager;
+    private AudioManager audioM;
+
 
     private void Awake()
     {
         canvas = GameObject.Find("MainCanvas");
+        audioManager = GameObject.Find("AudioManager");
+        audioM = audioManager.GetComponent<AudioManager>();
     }
 
     void Update()
@@ -45,6 +50,8 @@ public class DragDrop : MonoBehaviour
     {
         if (!isOverDropZone)
         {
+            audioM.PlaySound(audioM.drawCardAudio);
+
             startPosition = transform.position;
             startParent = transform.parent.gameObject;
             hand = transform.parent.gameObject;
@@ -71,6 +78,8 @@ public class DragDrop : MonoBehaviour
 
                 hand.GetComponent<Hand>().RemoveFromHand(gameObject);
 
+                audioM.PlaySound(audioM.drawCardAudio);
+
                 gameObject.GetComponent<CardEffect>().PlayEffect();
 
                 Debug.Log($"Card removed from Hand: {gameObject.name}");
@@ -87,6 +96,8 @@ public class DragDrop : MonoBehaviour
         {
             transform.position = startPosition;
             transform.SetParent(startParent.transform, false);
+
+            audioM.PlaySound(audioM.drawCardAudio);
         }
     }
 }

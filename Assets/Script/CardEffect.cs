@@ -9,10 +9,13 @@ public class CardEffect : MonoBehaviour
     private GameObject graveyardOpposite;
     private GameObject cardToRemove;
     private GameObject cardToRemoveOpposite;
-    
+    private AudioManager audioM;
+
 
     public void PlayEffect ()
     {
+        audioM = GameObject.Find("AudioManager").GetComponent<AudioManager>();
+
         string effect = GetComponent<DisplayCard>().cardEffect;
 
         GameObject dropZone = gameObject.transform.parent.gameObject;
@@ -23,10 +26,13 @@ public class CardEffect : MonoBehaviour
 
         if (effect == "PowerUp" || dropZone.GetComponent<DropZoneCards>().isPoweredUp)
         {
+            audioM.PlaySound(audioM.effectPowerUpAudio);
             if (gameObject.GetComponent<DisplayCard>().displayCard.cardKind != 'g')
             {
 
                 gameObject.GetComponent<DisplayCard>().CardPowerUp();
+                if (effect == "PowerUp")
+                    dropZoneCards.PowerUpDropZone();
             }
             else
             {
@@ -36,6 +42,7 @@ public class CardEffect : MonoBehaviour
 
         if (effect == "Climate" || dropZone.GetComponent<DropZoneCards>().isUnderClimateEffect)
         {
+            audioM.PlaySound(audioM.climateAudio);
             if (GetComponent<DisplayCard>().cardKind != 'g')
             {
                 string climateType = GetComponent<DisplayCard>().cardCommunion;
@@ -83,6 +90,8 @@ public class CardEffect : MonoBehaviour
 
         if (effect == "Destroyer" || effect == "WeakDestroyer")
         {
+            audioM.PlaySound(audioM.effectPowerUpAudio);
+
             (int, GameObject) toReturnSelf;
             (int, GameObject) toReturnOpposite;
 
@@ -128,6 +137,8 @@ public class CardEffect : MonoBehaviour
 
         if (effect == "Communion")
         {
+            audioM.PlaySound(audioM.effectPowerUpAudio);
+
             string cardId = gameObject.GetComponent<DisplayCard>().cardCommunion;
 
             int timesPowerUp = dropZoneCards.GetCountOfSpecifiedCard(cardId);
@@ -138,12 +149,16 @@ public class CardEffect : MonoBehaviour
 
         if (effect == "Average")
         {
+            audioM.PlaySound(audioM.effectPowerUpAudio);
+
             dropZoneCards.AverageCardsInDropZone();
             oppositeCards.AverageCardsInDropZone();
         }
 
         if (effect == "Take")
         {
+            audioM.PlaySound(audioM.drawCardAudio);
+
             if (GetComponent<DisplayCard>().cardFaction == 0)
                 hand = GameObject.Find("HandShrek");
             else
@@ -154,6 +169,8 @@ public class CardEffect : MonoBehaviour
 
         if (effect == "DestroyLine")
         {
+            audioM.PlaySound(audioM.effectPowerUpAudio);
+
             dropZoneCards.ClearDropZone(true);
             oppositeCards.ClearDropZone(true);
         }

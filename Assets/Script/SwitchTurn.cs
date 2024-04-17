@@ -27,6 +27,7 @@ public class SwitchTurn : MonoBehaviour
     int livesShrek = 2;
     int livesBad = 2;
 
+    private AudioManager audioM;
 
     private void Start()
     {
@@ -42,10 +43,14 @@ public class SwitchTurn : MonoBehaviour
         outSidePositionHand = new Vector2 (xx, yy2);
         playPositionLeader = new Vector2 (xxx1, yyy);
         outSidePositionLeader = new Vector2 (xxx2, yyy);
+
+        audioM = GameObject.Find("AudioManager").GetComponent<AudioManager>();
     }
 
     public void SwitchTurnPlayer (GameObject playerHand)
     {
+        audioM.PlaySound(audioM.turnAudio);
+
         if (playerHand == handShrek)
         {
             handShrek.transform.position = outSidePositionHand;
@@ -82,6 +87,8 @@ public class SwitchTurn : MonoBehaviour
 
         if (inHandShrek.isPass && inHandBad.isPass)
         {
+            audioM.PlaySound(audioM.roundAudio);
+
             GameObject looser = handShrek;
             inHandShrek.isPass = false;
             inHandBad.isPass = false;
