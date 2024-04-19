@@ -38,7 +38,7 @@ public class Deck : MonoBehaviour
         Debug.Log("Creating Deck...\n");
 
 
-        //deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/BadFaction/Special/AumentoBadCard.prefab")); Template
+        //deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/BadFaction/HuevoCard.prefab")); Template
 
         if (deckFaction == 0)
         {
@@ -109,6 +109,7 @@ public class Deck : MonoBehaviour
             deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/BadFaction/GrunnemeCard.prefab"));
             deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/BadFaction/JineteSinCabeza.prefab"));
             deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/BadFaction/ReinaMalvadaCard.prefab"));
+            deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/BadFaction/HuevoCard.prefab"));
 
             deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/BadFaction/Special/DecoyMBadCard.prefab"));
             deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/BadFaction/Special/DecoyRBadCard.prefab"));

@@ -17,7 +17,8 @@ MonoBehaviour:
   cardPower: 1
   cardPowerOG: 1
   cardName: Espejo Magico
-  cardDescription: Te voy a mostrar a las solteras entre las que puedes elegir...
+  cardDescription: 'Te voy a mostrar a las solteras entre las que puedes elegir...Efecto:
+    Aumento x2'
   cardCommunion: None
   cardKind: 115
   cardZone: 83

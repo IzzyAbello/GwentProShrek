@@ -17,7 +17,7 @@ MonoBehaviour:
   cardPower: 3
   cardPowerOG: 3
   cardName: "Gr\xFA\xF1eme!!!"
-  cardDescription: "Gr\xFA\xF1eme!!!"
+  cardDescription: "Gr\xFA\xF1eme!!!...Efecto: Destruye la carta mas debil"
   cardCommunion: None
   cardKind: 115
   cardZone: 77

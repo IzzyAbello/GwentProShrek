@@ -29,7 +29,6 @@ public class CardEffect : MonoBehaviour
             audioM.PlaySound(audioM.effectPowerUpAudio);
             if (gameObject.GetComponent<DisplayCard>().displayCard.cardKind != 'g')
             {
-
                 gameObject.GetComponent<DisplayCard>().CardPowerUp();
                 if (effect == "PowerUp")
                     dropZoneCards.PowerUpDropZone();
@@ -74,7 +73,7 @@ public class CardEffect : MonoBehaviour
                         climateZone.climateM.GetComponent<DropZoneCards>().ClimateEffectDropZone();
                         climateZone.climateM.GetComponent<DropZoneConditions>().oppositeDropZone.GetComponent<DropZoneCards>().ClimateEffectDropZone();
                     }
-                    if (climateType == "ClearClimate") //Through GameMaster
+                    if (climateType == "ClearClimate")
                     {
                         GameObject clear = GameObject.Find("Clear");
                         clear.GetComponent<ClearAllField>().ClearClimate();

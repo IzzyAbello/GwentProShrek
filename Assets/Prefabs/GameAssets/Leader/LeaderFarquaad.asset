@@ -17,8 +17,8 @@ MonoBehaviour:
   cardPower: 0
   cardPowerOG: 0
   cardName: Rey Farquaad
-  cardDescription: En cuanto a ti mi querida esposa, vivras en la guarida del dragon
-    el resto de tus dias
+  cardDescription: 'En cuanto a ti mi querida esposa, vivras en la guarida del dragon
+    el resto de tus dias... Efecto: Puedes robar una carta adicional'
   cardCommunion: None
   cardKind: 115
   cardZone: 77

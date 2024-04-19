@@ -17,7 +17,8 @@ MonoBehaviour:
   cardPower: 5
   cardPowerOG: 5
   cardName: "C\xEDclope"
-  cardDescription: Mi hija queria verte...
+  cardDescription: 'Mi hija queria verte... Efecto: Multiplica su ataque con cartas
+    similares'
   cardCommunion: Bar
   cardKind: 115
   cardZone: 82

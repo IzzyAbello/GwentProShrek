@@ -17,7 +17,7 @@ MonoBehaviour:
   cardPower: 7
   cardPowerOG: 7
   cardName: El Flautista
-  cardDescription: '*Pone la flauta en modo ogros'
+  cardDescription: '*Pone la flauta en modo ogros... Efecto Promedio'
   cardCommunion: None
   cardKind: 115
   cardZone: 83

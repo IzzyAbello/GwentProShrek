@@ -18,7 +18,7 @@ MonoBehaviour:
   cardPowerOG: 10
   cardName: El Gato con Botas
   cardDescription: "Perm\xEDteme explicarte: Cuando el abejito quiere mucho a la abejita,
-    le regala su semillita..."
+    le regala su semillita... Efecto: Destruye la linea"
   cardCommunion: None
   cardKind: 103
   cardZone: 83

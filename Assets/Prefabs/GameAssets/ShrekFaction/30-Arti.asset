@@ -17,7 +17,8 @@ MonoBehaviour:
   cardPower: 5
   cardPowerOG: 5
   cardName: Arti
-  cardDescription: Auxiliooo... un monstruo trata de hablar como yo para que le siga!!!
+  cardDescription: 'Auxiliooo... un monstruo trata de hablar como yo para que le siga!!!...
+    Efecto: Promedio'
   cardCommunion: None
   cardKind: 115
   cardZone: 82

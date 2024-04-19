@@ -17,7 +17,7 @@ MonoBehaviour:
   cardPower: 5
   cardPowerOG: 5
   cardName: Capitan Garfio
-  cardDescription: I like my town...
+  cardDescription: 'I like my town...Efecto: Multiplica su ataque con cartas similares'
   cardCommunion: Bar
   cardKind: 115
   cardZone: 82

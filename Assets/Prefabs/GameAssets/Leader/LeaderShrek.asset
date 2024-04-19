@@ -17,7 +17,7 @@ MonoBehaviour:
   cardPower: 0
   cardPowerOG: 0
   cardName: Shrek Tercero
-  cardDescription: Los ogros son como las cebollas...
+  cardDescription: 'Los ogros son como las cebollas... Efecto: Siempre gana los empates'
   cardCommunion: None
   cardKind: 115
   cardZone: 77

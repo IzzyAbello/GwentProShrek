@@ -17,7 +17,7 @@ MonoBehaviour:
   cardPower: 10
   cardPowerOG: 10
   cardName: Rumpelstinskin
-  cardDescription: Firmaaaaa
+  cardDescription: 'Firmaaaaa... Efecto: Destruye toda carta en la zona'
   cardCommunion: None
   cardKind: 103
   cardZone: 83
