@@ -81,7 +81,13 @@
     <Compile Include="Assets\Script\GetPoints.cs" />
     <Compile Include="Assets\Script\Graveyard.cs" />
     <Compile Include="Assets\Script\Hand.cs" />
+    <Compile Include="Assets\Script\Interpreter\AST.cs" />
     <Compile Include="Assets\Script\Interpreter\CodeEditor.cs" />
+    <Compile Include="Assets\Script\Interpreter\EditorButton.cs" />
+    <Compile Include="Assets\Script\Interpreter\Lexer.cs" />
+    <Compile Include="Assets\Script\Interpreter\MyTools.cs" />
+    <Compile Include="Assets\Script\Interpreter\Parser.cs" />
+    <Compile Include="Assets\Script\Interpreter\Token.cs" />
     <Compile Include="Assets\Script\LeaderCardDisplay.cs" />
     <Compile Include="Assets\Script\LeaderEffectBad.cs" />
     <Compile Include="Assets\Script\PowerUpDropZone.cs" />
