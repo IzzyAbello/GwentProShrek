@@ -72,6 +72,21 @@ public class Parser
                 UnaryOp node = new UnaryOp(token, Factor());
                 return node;
             }
+            if (token.type == Token.Type.BOOL)
+            {
+                string aux = token.value;
+                if (aux == "true" || aux == "false")
+                {
+                    Eat(Token.Type.BOOL);
+                    Bool node = new Bool(aux == "true");
+                    return node;
+                }
+                else
+                {
+                    Error();
+                    return new NoOp();
+                }
+            }
             if (token.type == Token.Type.INT)
             {
                 Eat(Token.Type.INT);
@@ -87,8 +102,14 @@ public class Parser
             }
             else
             {
-                if (currentToken.type == Token.Type.ID) return Variable();
-                else return FunctionStatement(currentToken.value);
+                if (currentToken.type == Token.Type.ID)
+                {
+                    return Variable();
+                }
+                else
+                {
+                    return FunctionStatement(currentToken.value);
+                }
             }
         }
         catch (System.Exception)
@@ -247,6 +268,32 @@ public class Parser
         {
             Var node = new Var(currentToken);
             Eat(Token.Type.ID);
+
+            if (currentToken.type == Token.Type.DOT)
+            {
+                VarComp nd = new VarComp(node.token);
+                while (currentToken.type == Token.Type.DOT)
+                {
+                    Eat(Token.Type.DOT);
+                    if (currentToken.type == Token.Type.FUNCTION)
+                    {
+                        Function f = FunctionStatement(currentToken.value);
+                        nd.args.Add(f);
+                    }
+                    else if (currentToken.type == Token.Type.POINTER)
+                    {
+                        Var v = new Var(currentToken);
+                        v.value = "pointer->" + v.value;
+                        nd.args.Add(v);
+                    } else if (currentToken.type != Token.Type.DOT)
+                    {
+                        Error();
+                        return node;
+                    }
+                }
+                node = nd;
+            }
+
             return node;
         }
         catch (System.Exception)
@@ -456,18 +503,13 @@ public class Parser
                 Eat(Token.Type.L_PARENTHESIS);
                 Args args = new Args(new List<AST>());
 
-                while (currentToken.type != Token.Type.COMA && currentToken.type != Token.Type.R_PARENTHESIS)
-                {
-                    AST currentArg = Variable();
-                    args.Add(currentArg);
-                    if (currentToken.type == Token.Type.COMA) Eat(Token.Type.COMA);
-                    else if (currentToken.type == Token.Type.R_PARENTHESIS)
-                    {
-                        Eat(Token.Type.R_PARENTHESIS);
-                        break;
-                    }
-                }
+                AST target = Variable();
+                args.Add(target);
+                Eat(Token.Type.COMA);
+                AST context = Variable();
+                Eat(Token.Type.R_PARENTHESIS);
                 Eat(Token.Type.ARROW);
+
                 AST node = CompoundStatement();
                 return node;
             }

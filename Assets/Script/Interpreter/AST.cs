@@ -368,6 +368,7 @@ public class Var : AST
 {
     public Token token;
     public string value;
+
     public Var(Token token)
     {
         this.token = token;
@@ -381,6 +382,27 @@ public class Var : AST
         Debug.Log(height + "Value: " + value);
     }
 }
+
+
+public class VarComp : Var
+{
+    public Args args;
+
+    public VarComp(Token token) : base (token)
+    {
+        args = new Args(new List<AST>());
+    }
+
+    public override void Print(string height)
+    {
+        base.Print(height);
+        foreach (AST ast in args.args)
+        {
+            ast.Print(height);
+        }
+    }
+}
+
 
 public class NoOp : AST
 {

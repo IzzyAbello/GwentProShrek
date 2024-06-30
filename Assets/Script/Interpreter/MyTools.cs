@@ -18,4 +18,16 @@ public static class MyTools
     {
         return (IsDigit(c) || IsAlpha(c));
     }
+
+    public static int BoolToInt(bool b)
+    {
+        if (b) return 1;
+        return 0;
+    }
+
+    public static bool IntToBool (int n)
+    {
+        if (n == 1) return true;
+        return false;
+    }
 }

@@ -31,6 +31,8 @@ public class Lexer
         reservedKeywords["Number"] = new Token(Token.Type.INT, "Number");
         reservedKeywords["String"] = new Token(Token.Type.STRING, "String");
         reservedKeywords["Bool"] = new Token(Token.Type.BOOL, "Bool");
+        reservedKeywords["true"] = new Token(Token.Type.BOOL, "true");
+        reservedKeywords["false"] = new Token(Token.Type.BOOL, "false");
         
         reservedKeywords["Action"] = new Token(Token.Type.ACTION, "Action");
 

@@ -84,6 +84,7 @@
     <Compile Include="Assets\Script\Interpreter\AST.cs" />
     <Compile Include="Assets\Script\Interpreter\CodeEditor.cs" />
     <Compile Include="Assets\Script\Interpreter\EditorButton.cs" />
+    <Compile Include="Assets\Script\Interpreter\Interpreter.cs" />
     <Compile Include="Assets\Script\Interpreter\Lexer.cs" />
     <Compile Include="Assets\Script\Interpreter\MyTools.cs" />
     <Compile Include="Assets\Script\Interpreter\Parser.cs" />
