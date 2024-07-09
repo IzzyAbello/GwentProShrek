@@ -2,17 +2,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Token : MonoBehaviour
+public class Token
 {
     public enum Type
     {
         // Single Char Tokens...
-        L_BRACKET, R_BRACKET, L_PARENTHESIS, R_PARENTHESIS, L_SQ_BRACKET, R_SQ_BRACKET, SEMI, COMA, DOT, DOTS, COLON, ARROW,
+        L_BRACKET, R_BRACKET, L_PARENTHESIS, R_PARENTHESIS, L_SQ_BRACKET, R_SQ_BRACKET, SEMI, COMA, 
+        DOT, DOTS, COLON, ARROW,
 
 
         // Conditional Tokens...
-        AND, OR, NOT, GREATER, LESS, GREATER_E, LESS_E, EQUAL, DIFFER, NULL, 
-        
+        AND, OR, NOT, GREATER, LESS, GREATER_E, LESS_E, EQUAL, DIFFER, NULL,
+
+        // Declarations...
+        D_INT, D_BOOL, D_STRING,
+
         // Literals...
         INT, BOOL, STRING, ID,
         
@@ -21,7 +25,7 @@ public class Token : MonoBehaviour
 
         // Keywords...
         IF, FOR, WHILE,  ACTION, CARD, EFFECT, NAME, PARAMS, TYPE, FACTION, POWER, RANGE,
-        ONACTIVATION, SELECTOR, SOURCE, SINGLE, PREDICATE, POSTACTION,  
+        ONACTIVATION, SELECTOR, SOURCE, SINGLE, PREDICATE, POSTACTION, IN, OA_EFFECT,
 
         // Functions...
         FUNCTION, POINTER,

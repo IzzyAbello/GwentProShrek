@@ -23,13 +23,13 @@ public class Interpreter
     {
         if (node.GetType() == typeof(BinOp)) return VisitBinOp((BinOp)node);
         if (node.GetType() == typeof(UnaryOp)) return VisitUnaryOp((UnaryOp)node);
-        if (node.GetType() == typeof(Num)) return VisitNum((Num)node);
+        if (node.GetType() == typeof(Int)) return VisitNum((Int)node);
         if (node.GetType() == typeof(String)) return VisitString((String)node);
         if (node.GetType() == typeof(Compound)) return VisitCompound((Compound)node);
         if (node.GetType() == typeof(Assign)) return VisitAssign((Assign)node);
         if (node.GetType() == typeof(Var)) return VisitVar((Var)node);
         if (node.GetType() == typeof(NoOp)) return VisitNoOp((NoOp)node);
-        if (node.GetType() == typeof(Conditional)) return VisitConditional((Conditional)node);
+        //if (node.GetType() == typeof(Conditional)) return VisitConditional((Conditional)node);
         if (node.GetType() == typeof(Function)) return VisitFunction((Function)node);
         Error();
         return 0;
@@ -112,7 +112,7 @@ public class Interpreter
         return 0;
     }
 
-    public int VisitNum(Num node)
+    public int VisitNum(Int node)
     {
         return node.value;
     }
@@ -128,7 +128,7 @@ public class Interpreter
         {
             int v = Visit(child);
             if ((child.GetType() == typeof(Compound) && v == 1)
-            || (child.GetType() == typeof(Conditional) && v == 1)
+            //|| (child.GetType() == typeof(Conditional) && v == 1)
             || (child.GetType() == typeof(Function) && ((Function)child).functionName == "break")) return 1;
         }
         return 0;
@@ -163,7 +163,7 @@ public class Interpreter
         return 0;
     }
 
-    public int VisitConditional(Conditional node)
+    /*public int VisitConditional(Conditional node)
     {
         if (node.type == Token.Type.IF)
         {
@@ -180,7 +180,7 @@ public class Interpreter
         }
         Error();
         return 0;
-    }
+    }*/
 
     public int VisitFunction(Function node)
     {
@@ -190,7 +190,7 @@ public class Interpreter
         {
             args.Add(Visit(arg));
         }
-        return Commands.activate(node.functionName, args);
+        return 0; //Commands.activate(node.functionName, args);
     }
 
     public int Interpret()

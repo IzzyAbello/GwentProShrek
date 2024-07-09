@@ -9,8 +9,20 @@ public class Lexer
     public int pos;
     public char currentChar;
     public Dictionary<string, Token> reservedKeywords = new Dictionary<string, Token>();
-
     public Dictionary<char, bool> spaceChar = new Dictionary<char, bool>();
+
+    public void ReadAllText()
+    {
+        while (true)
+        {
+            Token t = GetNextToken();
+
+            Debug.Log("This Token: " + t.type.ToString() + "\n" + t.value);
+
+            if (t.type == Token.Type.EOF) break;
+        }
+    }
+
 
     public Lexer(string text)
     {
@@ -22,37 +34,37 @@ public class Lexer
 
         reservedKeywords["while"] = new Token(Token.Type.WHILE, "while");
         reservedKeywords["for"] = new Token(Token.Type.FOR, "for");
-
+        reservedKeywords["in"] = new Token(Token.Type.IN, "in");
 
         reservedKeywords["effect"] = new Token(Token.Type.EFFECT, "effect");
         reservedKeywords["Name"] = new Token(Token.Type.NAME, "Name");
         reservedKeywords["Params"] = new Token(Token.Type.PARAMS, "Params");
 
-        reservedKeywords["Number"] = new Token(Token.Type.INT, "Number");
-        reservedKeywords["String"] = new Token(Token.Type.STRING, "String");
-        reservedKeywords["Bool"] = new Token(Token.Type.BOOL, "Bool");
+        reservedKeywords["Number"] = new Token(Token.Type.D_INT, "Number");
+        reservedKeywords["String"] = new Token(Token.Type.D_STRING, "String");
+        reservedKeywords["Bool"] = new Token(Token.Type.D_BOOL, "Bool");
         reservedKeywords["true"] = new Token(Token.Type.BOOL, "true");
         reservedKeywords["false"] = new Token(Token.Type.BOOL, "false");
         
         reservedKeywords["Action"] = new Token(Token.Type.ACTION, "Action");
 
         reservedKeywords["TriggerPlayer"] = new Token(Token.Type.POINTER, "TriggerPlayer");
-        reservedKeywords["HandOfPlayer"] = new Token(Token.Type.POINTER, "HandOfPlayer");
-        reservedKeywords["FieldOfPlayer"] = new Token(Token.Type.POINTER, "FieldOfPlayer");
-        reservedKeywords["GraveyardOfPlayer"] = new Token(Token.Type.POINTER, "GraveyardOfPlayer");
-        reservedKeywords["DeckOfPlayer"] = new Token(Token.Type.POINTER, "DeckOfPlayer");
-        reservedKeywords["Hand"] = new Token(Token.Type.POINTER, "HandOfPlayer(context.TriggerPlayer)");
-        reservedKeywords["Field"] = new Token(Token.Type.POINTER, "FieldOfPlayer(context.TriggerPlayer)");
-        reservedKeywords["Graveyard"] = new Token(Token.Type.POINTER, "GraveyardOfPlayer(context.TriggerPlayer)");
-        reservedKeywords["Deck"] = new Token(Token.Type.POINTER, "DeckOfPlayer(context.TriggerPlayer)");
+        
+        reservedKeywords["Hand"] = new Token(Token.Type.POINTER, "Hand");
+        reservedKeywords["Field"] = new Token(Token.Type.POINTER, "Field");
+        reservedKeywords["Graveyard"] = new Token(Token.Type.POINTER, "Graveyard");
+        reservedKeywords["Deck"] = new Token(Token.Type.POINTER, "Deck");
 
+        reservedKeywords["HandOfPlayer"] = new Token(Token.Type.FUNCTION, "HandOfPlayer");
+        reservedKeywords["FieldOfPlayer"] = new Token(Token.Type.FUNCTION, "FieldOfPlayer");
+        reservedKeywords["GraveyardOfPlayer"] = new Token(Token.Type.FUNCTION, "GraveyardOfPlayer");
+        reservedKeywords["DeckOfPlayer"] = new Token(Token.Type.FUNCTION, "DeckOfPlayer");
         reservedKeywords["Find"] = new Token(Token.Type.FUNCTION, "Find");
         reservedKeywords["Push"] = new Token(Token.Type.FUNCTION, "Push");
         reservedKeywords["SendBottom"] = new Token(Token.Type.FUNCTION, "SendBottom");
         reservedKeywords["Pop"] = new Token(Token.Type.FUNCTION, "Pop");
         reservedKeywords["Remove"] = new Token(Token.Type.FUNCTION, "Remove");
         reservedKeywords["Shuffle"] = new Token(Token.Type.FUNCTION, "Shuffle");
-        reservedKeywords["Find"] = new Token(Token.Type.FUNCTION, "Find");
 
         reservedKeywords["Card"] = new Token(Token.Type.CARD, "Card");
         
@@ -62,6 +74,7 @@ public class Lexer
         reservedKeywords["Range"] = new Token(Token.Type.RANGE, "Range");
         
         reservedKeywords["OnActivation"] = new Token(Token.Type.ONACTIVATION, "OnActivation");
+        reservedKeywords["Effect"] = new Token(Token.Type.OA_EFFECT, "Effect");
         reservedKeywords["PostAction"] = new Token(Token.Type.POSTACTION, "PostAction");
         reservedKeywords["Effect"] = new Token(Token.Type.EFFECT, "Effect");
         reservedKeywords["Selector"] = new Token(Token.Type.SELECTOR, "Selector");
@@ -96,7 +109,7 @@ public class Lexer
 
     public void SkipWhitespace()
     {
-        while (currentChar != '\0' && spaceChar[currentChar]) Advance();
+        while (currentChar != '\0' && spaceChar.ContainsKey(currentChar)) Advance();
     }
 
     public string Integer()
@@ -142,7 +155,7 @@ public class Lexer
     {
         while (currentChar != '\0')
         {
-            if (spaceChar[currentChar])
+            if (spaceChar.ContainsKey(currentChar))
             {
                 SkipWhitespace();
                 continue;
