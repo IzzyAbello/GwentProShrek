@@ -82,6 +82,12 @@ public class Parser
                 Int node = new Int(token);
                 return node;
             }
+            if (token.type == Token.Type.STRING)
+            {
+                Eat(Token.Type.STRING);
+                String node = new String(token);
+                return node;
+            }
             if (token.type == Token.Type.L_PARENTHESIS)
             {
                 Eat(Token.Type.L_PARENTHESIS);
@@ -111,26 +117,11 @@ public class Parser
         try
         {
             AST node = Factor();
-
-            if (currentToken.type == Token.Type.MULT ||
-                currentToken.type == Token.Type.DIVIDE ||
-                currentToken.type == Token.Type.MOD)
+            Token token = currentToken;
+            if (token.type == Token.Type.MULT || token.type == Token.Type.DIVIDE || token.type == Token.Type.MOD)
             {
-                Token token = currentToken;
-                if (token.type == Token.Type.MULT)
-                {
-                    Eat(Token.Type.MULT);
-                }
-                else if (token.type == Token.Type.DIVIDE)
-                {
-                    Eat(Token.Type.DIVIDE);
-                }
-                else if (token.type == Token.Type.MOD)
-                {
-                    Eat(Token.Type.MOD);
-                }
-
-                node = new BinOp(node, token, Factor());
+                Eat(token.type);
+                node = new BinOp(node, token, Expression());
             }
             return node;
         }
@@ -146,17 +137,10 @@ public class Parser
         {
             AST node = Term();
             Token token = currentToken;
-            if (currentToken.type == Token.Type.PLUS || currentToken.type == Token.Type.MINUS)
+            if (token.type == Token.Type.PLUS || token.type == Token.Type.MINUS)
             {
-                if (token.type == Token.Type.PLUS)
-                {
-                    Eat(Token.Type.PLUS);
-                }
-                else if (token.type == Token.Type.MINUS)
-                {
-                    Eat(Token.Type.MINUS);
-                }
-                node = new BinOp(node, token, Term());
+                Eat(token.type);
+                node = new BinOp(node, token, Expression());
             }
             return node;
         }
@@ -188,6 +172,7 @@ public class Parser
             }
 
             AST left = Expression();
+
             token = currentToken;
             if (token.type == Token.Type.EQUAL) Eat(Token.Type.EQUAL);
             else if (token.type == Token.Type.DIFFER) Eat(Token.Type.DIFFER);
@@ -195,9 +180,11 @@ public class Parser
             else if (token.type == Token.Type.LESS_E) Eat(Token.Type.LESS_E);
             else if (token.type == Token.Type.LESS) Eat(Token.Type.LESS);
             else if (token.type == Token.Type.GREATER) Eat(Token.Type.GREATER);
+            else if (token.type == Token.Type.R_PARENTHESIS) return left;
             else Error();
 
             AST right = Expression();
+
             BinOp node = new BinOp(left, token, right);
             return node;
         }
@@ -217,7 +204,7 @@ public class Parser
             if (token.type == Token.Type.OR)
             {
                 Eat(Token.Type.OR);
-                return new BinOp(node, token, BooleanFactor());
+                return new BinOp(node, token, BooleanExpression());
             }
             return node;
         }
@@ -237,21 +224,9 @@ public class Parser
             if (token.type == Token.Type.AND)
             {
                 Eat(Token.Type.AND);
-                node = new BinOp(node, token, BooleanTerm());
+                node = new BinOp(node, token, BooleanExpression());
             }
             return node;
-        }
-        catch (System.Exception)
-        {
-            throw;
-        }
-    }
-
-    public NoOp Empty()
-    {
-        try
-        {
-            return new NoOp();
         }
         catch (System.Exception)
         {
@@ -269,7 +244,7 @@ public class Parser
             if (currentToken.type == Token.Type.DOT)
             {
                 VarComp nd = new VarComp(node.token);
-                while (currentToken.type == Token.Type.DOT)
+                while (currentToken.type == Token.Type.DOT && currentToken.type != Token.Type.EOF)
                 {
                     Eat(Token.Type.DOT);
                     if (currentToken.type == Token.Type.FUNCTION)
@@ -277,16 +252,54 @@ public class Parser
                         Function f = FunctionStatement(currentToken.value);
                         nd.args.Add(f);
                     }
-                    else if (currentToken.type == Token.Type.POINTER) // Look for this...
+                    else // Look for this...
                     {
-                        Var v = new Var(currentToken);
-                        v.value = "pointer->" + v.value;
-                        nd.args.Add(v);
+                        Token token = currentToken;
+                        if (token.type == Token.Type.TYPE)
+                        {
+                            Eat(token.type);
+                            Type v = new Type(token);
+                            nd.args.Add(v);
+                        }
+                        else if (token.type == Token.Type.NAME)
+                        {
+                            Eat(token.type);
+                            Name v = new Name(token);
+                            nd.args.Add(v);
+                        }
+                        else if (token.type == Token.Type.FACTION)
+                        {
+                            Eat(token.type);
+                            Faction v = new Faction(token);
+                            nd.args.Add(v);
+                        }
+                        else if (token.type == Token.Type.POWER)
+                        {
+                            Eat(token.type);
+                            PowerAsField v = new PowerAsField();
+                            nd.args.Add(v);
+                        }
+                        else if (token.type == Token.Type.RANGE)
+                        {
+                            Eat(token.type);
+                            Range v = new Range(token);
+                            nd.args.Add(v);
+                        }
+                        else if (token.type == Token.Type.POINTER)
+                        {
+                            Eat(token.type);
+                            Pointer v = new Pointer(token);
+                            nd.args.Add(v);
+                        }
+                        else
+                        {
+                            Error();
+                            Eat(currentToken.type);
+                        }
                     }
                 }
                 node = nd;
             }
-
             return node;
         }
         catch (System.Exception)
@@ -320,7 +333,7 @@ public class Parser
             Eat(Token.Type.FUNCTION);
             Eat(Token.Type.L_PARENTHESIS);
 
-            while (currentToken.type != Token.Type.R_PARENTHESIS)
+            while (currentToken.type != Token.Type.R_PARENTHESIS && currentToken.type != Token.Type.EOF)
             {
                 AST currentArg = Expression();
                 args.Add(currentArg);
@@ -423,7 +436,7 @@ public class Parser
             {
                 Var variable = Variable();
 
-                if (currentToken.type == Token.Type.SEMI) // THIS
+                if (variable.GetType() == typeof(VarComp) && currentToken.type == Token.Type.SEMI) // THIS
                 {
                     VarComp v = variable as VarComp;
                     if (v.args[v.args.Count - 1].GetType() == typeof(Function))
@@ -438,14 +451,10 @@ public class Parser
                 else if (currentToken.type == Token.Type.ASSIGN)
                 {
                     Assign node = AssignmentStatement(variable);
-                    Eat(Token.Type.SEMI);
                     return node;
                 }
-            }
 
-            if (currentToken.type == Token.Type.R_BRACKET)
-            {
-                return Empty();
+                return new NoOp();
             }
 
             Error();
@@ -463,13 +472,11 @@ public class Parser
         {
             List<AST> results = new List<AST>();
 
-            while (currentToken.type != Token.Type.R_BRACKET)
+            while (currentToken.type != Token.Type.R_BRACKET && currentToken.type != Token.Type.EOF)
             {
-                results.Add(Statement());
-                if (currentToken.type != Token.Type.R_BRACKET)
-                {
-                    Eat(Token.Type.SEMI);
-                }
+                AST node = Statement();
+                results.Add(node);
+                Eat(Token.Type.SEMI);
             }
 
             return results;
@@ -489,9 +496,9 @@ public class Parser
             Eat(Token.Type.R_BRACKET);
 
             Compound root = new Compound();
-            foreach (AST node in nodes)
+            for (int i = 0; i < nodes.Count; i++)
             {
-                root.children.Add(node);
+                root.children.Add(nodes[i]);
             }
 
             return root;
@@ -577,9 +584,9 @@ public class Parser
             Eat(Token.Type.L_BRACKET);
 
             Name name = null;
-            Args parameters = null;
+            Args parameters = new Args();
 
-            while (currentToken.type == Token.Type.R_BRACKET)
+            while (currentToken.type != Token.Type.R_BRACKET && currentToken.type != Token.Type.EOF)
             {
                 if (currentToken.type == Token.Type.NAME)
                 {
@@ -592,22 +599,25 @@ public class Parser
                 }
                 else if (currentToken.type == Token.Type.ID)
                 {
-                    Var variable = new Var(currentToken);
-                    Eat(Token.Type.ID);
+                    Var variable = Variable();
                     Token token = currentToken;
                     Eat(Token.Type.COLON);
                     AST value = Expression();
-                    Assign param = new Assign(variable, currentToken, value);
+                    Assign param = new Assign(variable, token, value);
                     parameters.Add(param);
                     if (currentToken.type != Token.Type.R_BRACKET) Eat(Token.Type.COMA);
                 }
-                else Error();
+                else { Error(); Eat(currentToken.type); }
             }
             Eat(Token.Type.R_BRACKET);
 
             if (name == null) Error();
 
-            EffectOnActivation node = new EffectOnActivation(name, parameters);
+            EffectOnActivation node;
+            if (parameters.args.Count == 0)
+                node = new EffectOnActivation(name);
+            else node = new EffectOnActivation(name, parameters);
+
             return node;
         }
         catch (System.Exception)
@@ -693,7 +703,7 @@ public class Parser
             Single single = null;
             Predicate predicate = null;
 
-            while (currentToken.type != Token.Type.R_BRACKET)
+            while (currentToken.type != Token.Type.R_BRACKET && currentToken.type != Token.Type.EOF)
             {
                 if (currentToken.type == Token.Type.SOURCE)
                 {
@@ -722,7 +732,7 @@ public class Parser
                     }
                     else Error();
                 }
-                else Error();
+                else { Error(); Eat(currentToken.type); }
             }
             Eat(Token.Type.R_BRACKET);
 
@@ -752,7 +762,7 @@ public class Parser
             Type type = null;
             Selector selector = null;
 
-            while (currentToken.type != Token.Type.R_BRACKET)
+            while (currentToken.type != Token.Type.R_BRACKET && currentToken.type != Token.Type.EOF)
             {
                 if (currentToken.type == Token.Type.TYPE)
                 {
@@ -800,7 +810,7 @@ public class Parser
             Selector selector = null;
             PostAction postAction = null;
 
-            while (currentToken.type != Token.Type.R_BRACKET)
+            while (currentToken.type != Token.Type.R_BRACKET && currentToken.type != Token.Type.EOF)
             {
                 if (currentToken.type == Token.Type.OA_EFFECT)
                 {
@@ -829,15 +839,17 @@ public class Parser
                     }
                     else Error();
                 }
-                else Error();
+                else { Error(); Eat(currentToken.type); }
             }
             Eat(Token.Type.R_BRACKET);
 
 
-            if (effectOnActivation == null || selector == null) Error();
+            if (effectOnActivation == null) Error();
 
             OnActivationElement node;
-            if (postAction == null) node = new OnActivationElement(effectOnActivation, selector);
+            if (selector == null && postAction == null) node = new OnActivationElement(effectOnActivation);
+            else if (postAction == null) node = new OnActivationElement(effectOnActivation, selector);
+            else if (selector == null) node = new OnActivationElement(effectOnActivation, postAction);
             else node = new OnActivationElement(effectOnActivation, selector, postAction);
 
             return node;
@@ -854,7 +866,7 @@ public class Parser
         {
             List<OnActivationElement> nodes = new List<OnActivationElement>();
 
-            while (currentToken.type != Token.Type.R_SQ_BRACKET)
+            while (currentToken.type != Token.Type.R_SQ_BRACKET && currentToken.type != Token.Type.EOF)
             {
                 if (currentToken.type == Token.Type.L_BRACKET)
                 {
@@ -882,11 +894,13 @@ public class Parser
             Eat(Token.Type.L_SQ_BRACKET);
             List<OnActivationElement> list = OnActivationList();
             Eat(Token.Type.R_SQ_BRACKET);
+
             OnActivation node = new OnActivation();
-            foreach (OnActivationElement element in list)
+            for (int i = 0; i < list.Count; i++)
             {
-                node.onActivation.Add(element);
+                node.onActivation.Add(list[i]);
             }
+
             return node;
         }
         catch (System.Exception)
@@ -909,10 +923,7 @@ public class Parser
             Range range = null;
             OnActivation onActivation = null;
 
-            List<AST> listOfParameters = new List<AST> { name, type, faction, power, range, onActivation };
-            
-
-            while (currentToken.type != Token.Type.R_BRACKET)
+            while (currentToken.type != Token.Type.R_BRACKET && currentToken.type != Token.Type.EOF)
             {
                 if (currentToken.type == Token.Type.NAME)
                 {
@@ -968,16 +979,18 @@ public class Parser
                     }
                     else Error();
                 }
-                else Error();
+                else { Error();  Eat(currentToken.type); }
             }
             Eat(Token.Type.R_BRACKET);
 
+            List<AST> listOfParameters = new List<AST> { name, type, faction, power, range, onActivation };
             foreach (AST child in listOfParameters)
             {
                 if (child == null) Error();
             }
 
             CardNode node = new CardNode(name, type, faction, power, range, onActivation);
+
             return node;
         }
         catch (System.Exception)
@@ -1009,7 +1022,7 @@ public class Parser
         {
             Args args = new Args();
 
-            while (currentToken.type != Token.Type.R_BRACKET)
+            while (currentToken.type != Token.Type.R_BRACKET && currentToken.type != Token.Type.EOF)
             {
                 Var variable = Variable();
                 Eat(Token.Type.COLON);
@@ -1099,7 +1112,7 @@ public class Parser
             Args parameters = null;
             Action action = null;
 
-            while (currentToken.type == Token.Type.R_BRACKET)
+            while (currentToken.type != Token.Type.R_BRACKET && currentToken.type != Token.Type.EOF)
             {
                 if (currentToken.type == Token.Type.NAME)
                 {
@@ -1131,8 +1144,9 @@ public class Parser
                     }
                     else Error();
                 }
-                else Error();
+                else { Error(); Eat(currentToken.type); }
             }
+
             Eat(Token.Type.R_BRACKET);
 
             if (name == null || action == null)
@@ -1168,15 +1182,18 @@ public class Parser
             {
                 if (currentToken.type == Token.Type.CARD)
                 {
-                    listOfCardAndEffect.Add(CardCreation());
+                    CardNode node = CardCreation();
+                    listOfCardAndEffect.Add(node);
                 }
                 else if (currentToken.type == Token.Type.EFFECT)
                 {
-                    listOfCardAndEffect.Add(EffectCreation());
+                    EffectNode node = EffectCreation();
+                    listOfCardAndEffect.Add(node);
                 }
                 else 
                 {
                     Error();
+                    Eat(currentToken.type);
                 }
             }
 
@@ -1213,11 +1230,14 @@ public class Parser
     {
         try
         {
-            AST node = Program();
+            Compound node = Program();
             if (currentToken.type != Token.Type.EOF)
             {
                 Error();
             }
+
+            node.Print("");
+
             return node;
         }
         catch (System.Exception)

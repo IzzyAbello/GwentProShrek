@@ -1730,7 +1730,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inputField: {fileID: 1279264171}
   ogPosition: {x: 0, y: 0}
-  editor: {fileID: 0}
+  editor: {fileID: 1444112602}
 --- !u!1 &914184031
 GameObject:
   m_ObjectHideFlags: 0
@@ -2436,7 +2436,6 @@ GameObject:
   - component: {fileID: 1177500260}
   - component: {fileID: 1177500259}
   - component: {fileID: 1177500258}
-  - component: {fileID: 1177500261}
   m_Layer: 5
   m_Name: ButtonEditor
   m_TagString: Untagged
@@ -2504,7 +2503,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1177500261}
+      - m_Target: {fileID: 893837979}
         m_MethodName: OnClickGoToEditor
         m_Mode: 1
         m_Arguments:
@@ -2554,21 +2553,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1177500256}
   m_CullTransparentMesh: 0
---- !u!114 &1177500261
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1177500256}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f881850add83313428565355d08cd818, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  inputField: {fileID: 0}
-  ogPosition: {x: 0, y: 0}
-  editor: {fileID: 1444112602}
 --- !u!1 &1183441918 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5516743736435019712, guid: 304b0c1edd2ce8c4ca344f0460294256,
@@ -6619,7 +6603,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 1177500261}
+      objectReference: {fileID: 0}
     - target: {fileID: 657857432055485571, guid: 9d613605c802a694a820bf9536cf547e,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName

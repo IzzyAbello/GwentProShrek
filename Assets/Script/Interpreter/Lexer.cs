@@ -7,9 +7,10 @@ public class Lexer
 {
     public string text;
     public int pos;
+    public int row;
+    public int column;
     public char currentChar;
     public Dictionary<string, Token> reservedKeywords = new Dictionary<string, Token>();
-    public Dictionary<char, bool> spaceChar = new Dictionary<char, bool>();
 
     public void ReadAllText()
     {
@@ -17,7 +18,7 @@ public class Lexer
         {
             Token t = GetNextToken();
 
-            Debug.Log("This Token: " + t.type.ToString() + "\n" + t.value);
+            Debug.Log("In Row " + row + " and Column " + column + "\nThis Token: " + t.type.ToString() + "\n" + t.value);
 
             if (t.type == Token.Type.EOF) break;
         }
@@ -28,9 +29,9 @@ public class Lexer
     {
         this.text = text;
         pos = 0;
+        row = 0;
+        column = 0;
         currentChar = text[0];
-
-        spaceChar[' '] = true; spaceChar['\n'] = true; spaceChar['\t'] = true;
 
         reservedKeywords["while"] = new Token(Token.Type.WHILE, "while");
         reservedKeywords["for"] = new Token(Token.Type.FOR, "for");
@@ -45,15 +46,17 @@ public class Lexer
         reservedKeywords["Bool"] = new Token(Token.Type.D_BOOL, "Bool");
         reservedKeywords["true"] = new Token(Token.Type.BOOL, "true");
         reservedKeywords["false"] = new Token(Token.Type.BOOL, "false");
-        
+
         reservedKeywords["Action"] = new Token(Token.Type.ACTION, "Action");
 
         reservedKeywords["TriggerPlayer"] = new Token(Token.Type.POINTER, "TriggerPlayer");
-        
+
         reservedKeywords["Hand"] = new Token(Token.Type.POINTER, "Hand");
         reservedKeywords["Field"] = new Token(Token.Type.POINTER, "Field");
         reservedKeywords["Graveyard"] = new Token(Token.Type.POINTER, "Graveyard");
         reservedKeywords["Deck"] = new Token(Token.Type.POINTER, "Deck");
+        reservedKeywords["Owner"] = new Token(Token.Type.POINTER, "Owner");
+        reservedKeywords["Board"] = new Token(Token.Type.POINTER, "Board");
 
         reservedKeywords["HandOfPlayer"] = new Token(Token.Type.FUNCTION, "HandOfPlayer");
         reservedKeywords["FieldOfPlayer"] = new Token(Token.Type.FUNCTION, "FieldOfPlayer");
@@ -65,18 +68,18 @@ public class Lexer
         reservedKeywords["Pop"] = new Token(Token.Type.FUNCTION, "Pop");
         reservedKeywords["Remove"] = new Token(Token.Type.FUNCTION, "Remove");
         reservedKeywords["Shuffle"] = new Token(Token.Type.FUNCTION, "Shuffle");
+        reservedKeywords["Add"] = new Token(Token.Type.FUNCTION, "Add");
 
-        reservedKeywords["Card"] = new Token(Token.Type.CARD, "Card");
-        
+        reservedKeywords["card"] = new Token(Token.Type.CARD, "Card");
+
         reservedKeywords["Type"] = new Token(Token.Type.TYPE, "Type");
         reservedKeywords["Faction"] = new Token(Token.Type.FACTION, "Faction");
         reservedKeywords["Power"] = new Token(Token.Type.POWER, "Power");
         reservedKeywords["Range"] = new Token(Token.Type.RANGE, "Range");
-        
+
         reservedKeywords["OnActivation"] = new Token(Token.Type.ONACTIVATION, "OnActivation");
         reservedKeywords["Effect"] = new Token(Token.Type.OA_EFFECT, "Effect");
         reservedKeywords["PostAction"] = new Token(Token.Type.POSTACTION, "PostAction");
-        reservedKeywords["Effect"] = new Token(Token.Type.EFFECT, "Effect");
         reservedKeywords["Selector"] = new Token(Token.Type.SELECTOR, "Selector");
         reservedKeywords["Source"] = new Token(Token.Type.SOURCE, "Source");
         reservedKeywords["Single"] = new Token(Token.Type.SINGLE, "Single");
@@ -85,10 +88,9 @@ public class Lexer
 
     public void Error()
     {
-        Debug.Log("Invalid character '" + currentChar + "' at position " + pos);
+        Debug.Log("Invalid character '" + currentChar + "' at position " + row + " " + column);
         Debug.Log("Code:");
         Debug.Log(text);
-        Debug.Break();
     }
 
     public void Advance()
@@ -103,13 +105,21 @@ public class Lexer
     {
         int PeekPos = pos + 1;
         if (PeekPos >= text.Length) return '\0';
-        
+
         return text[PeekPos];
     }
 
     public void SkipWhitespace()
     {
-        while (currentChar != '\0' && spaceChar.ContainsKey(currentChar)) Advance();
+        while (currentChar != '\0' && (currentChar == ' ' || currentChar == '\n' || currentChar == '\t' || currentChar == '\r'))
+        {
+            if (currentChar == '\n')
+            {
+                column = 0;
+                row++;
+            }
+            Advance();
+        }
     }
 
     public string Integer()
@@ -143,10 +153,10 @@ public class Lexer
             result += currentChar;
             Advance();
         }
-        
+
         if (!reservedKeywords.ContainsKey(result))
             reservedKeywords[result] = new Token(Token.Type.ID, result);
-        
+
         token = reservedKeywords[result];
         return token;
     }
@@ -155,8 +165,14 @@ public class Lexer
     {
         while (currentChar != '\0')
         {
-            if (spaceChar.ContainsKey(currentChar))
+            column++;
+            if (currentChar == ' ' || currentChar == '\n' || currentChar == '\t' || currentChar == '\r')
             {
+                if (currentChar == '\n')
+                {
+                    column = 0;
+                    row++;
+                }
                 SkipWhitespace();
                 continue;
             }
@@ -173,7 +189,7 @@ public class Lexer
             }
             if (currentChar == '+' && Peek() == '+')
             {
-                Advance();Advance();
+                Advance(); Advance();
 
                 Token token = new Token(Token.Type.PLUS1, "++");
                 return token;
@@ -244,8 +260,8 @@ public class Lexer
             }
             if (currentChar == '!' && Peek() == '=')
             {
-                Advance();Advance();
-                
+                Advance(); Advance();
+
                 Token token = new Token(Token.Type.DIFFER, "!=");
                 return token;
             }
@@ -265,21 +281,21 @@ public class Lexer
             if (currentChar == '|' && Peek() == '|')
             {
                 Advance(); Advance();
-                
+
                 Token token = new Token(Token.Type.OR, "||");
                 return token;
             }
             if (currentChar == '>' && Peek() == '=')
             {
                 Advance(); Advance();
-                
+
                 Token token = new Token(Token.Type.GREATER_E, ">=");
                 return token;
             }
             if (currentChar == '<' && Peek() == '=')
             {
                 Advance(); Advance();
-                
+
                 Token token = new Token(Token.Type.LESS_E, "<=");
                 return token;
             }
@@ -317,6 +333,18 @@ public class Lexer
             {
                 Advance();
                 Token token = new Token(Token.Type.R_BRACKET, "}");
+                return token;
+            }
+            if (currentChar == '[')
+            {
+                Advance();
+                Token token = new Token(Token.Type.L_SQ_BRACKET, "[");
+                return token;
+            }
+            if (currentChar == ']')
+            {
+                Advance();
+                Token token = new Token(Token.Type.R_SQ_BRACKET, "]");
                 return token;
             }
             if (currentChar == ':')

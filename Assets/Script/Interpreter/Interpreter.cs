@@ -13,189 +13,45 @@ public class Interpreter
         GLOBAL_SCOPE = new Dictionary<string, int>();
     }
 
-    public void Error()
+
+    /*public void VisitNode(AST node)
     {
-        Debug.Log("Operator not found");
-        Debug.Break();
-    }
-
-    public int Visit(AST node)
-    {
-        if (node.GetType() == typeof(BinOp)) return VisitBinOp((BinOp)node);
-        if (node.GetType() == typeof(UnaryOp)) return VisitUnaryOp((UnaryOp)node);
-        if (node.GetType() == typeof(Int)) return VisitNum((Int)node);
-        if (node.GetType() == typeof(String)) return VisitString((String)node);
-        if (node.GetType() == typeof(Compound)) return VisitCompound((Compound)node);
-        if (node.GetType() == typeof(Assign)) return VisitAssign((Assign)node);
-        if (node.GetType() == typeof(Var)) return VisitVar((Var)node);
-        if (node.GetType() == typeof(NoOp)) return VisitNoOp((NoOp)node);
-        //if (node.GetType() == typeof(Conditional)) return VisitConditional((Conditional)node);
-        if (node.GetType() == typeof(Function)) return VisitFunction((Function)node);
-        Error();
-        return 0;
-    }
-
-    public int VisitBinOp(BinOp node)
-    {
-        if (node.op.type == Token.Type.PLUS)
-        {
-            return Visit(node.left) + Visit(node.right);
-        }
-        if (node.op.type == Token.Type.MINUS)
-        {
-            return Visit(node.left) - Visit(node.right);
-        }
-        if (node.op.type == Token.Type.MULT)
-        {
-            return Visit(node.left) * Visit(node.right);
-        }
-        if (node.op.type == Token.Type.DIVIDE)
-        {
-            return Visit(node.left) / Visit(node.right);
-        }
-        if (node.op.type == Token.Type.MOD)
-        {
-            return Visit(node.left) % Visit(node.right);
-        }
-        if (node.op.type == Token.Type.AND)
-        {
-            return MyTools.BoolToInt(MyTools.IntToBool(Visit(node.left)) & MyTools.IntToBool(Visit(node.right)));
-        }
-        if (node.op.type == Token.Type.OR)
-        {
-            return MyTools.BoolToInt(MyTools.IntToBool(Visit(node.left)) | MyTools.IntToBool(Visit(node.right)));
-        }
-        if (node.op.type == Token.Type.EQUAL)
-        {
-            return MyTools.BoolToInt(Visit(node.left) == Visit(node.right));
-        }
-        if (node.op.type == Token.Type.DIFFER)
-        {
-            return MyTools.BoolToInt(Visit(node.left) != Visit(node.right));
-        }
-        if (node.op.type == Token.Type.GREATER_E)
-        {
-            return MyTools.BoolToInt(Visit(node.left) >= Visit(node.right));
-        }
-        if (node.op.type == Token.Type.LESS_E)
-        {
-            return MyTools.BoolToInt(Visit(node.left) <= Visit(node.right));
-        }
-        if (node.op.type == Token.Type.GREATER)
-        {
-            return MyTools.BoolToInt(Visit(node.left) > Visit(node.right));
-        }
-        if (node.op.type == Token.Type.LESS)
-        {
-            return MyTools.BoolToInt(Visit(node.left) < Visit(node.right));
-        }
-        return 0;
-    }
-
-    public int VisitUnaryOp(UnaryOp node)
-    {
-        if (node.op.type == Token.Type.PLUS)
-        {
-            return +Visit(node.expr);
-        }
-        if (node.op.type == Token.Type.MINUS)
-        {
-            return -Visit(node.expr);
-        }
-        if (node.op.type == Token.Type.NOT)
-        {
-            if (Visit(node.expr) == 1) return 0;
-            if (Visit(node.expr) == 0) return 1;
-            Error();
-            return 0;
-        }
-        return 0;
-    }
-
-    public int VisitNum(Int node)
-    {
-        return node.value;
-    }
-
-    public int VisitString(String node)
-    {
-        return 0;
-    }
-
-    public int VisitCompound(Compound node)
-    {
-        foreach (AST child in node.children)
-        {
-            int v = Visit(child);
-            if ((child.GetType() == typeof(Compound) && v == 1)
-            //|| (child.GetType() == typeof(Conditional) && v == 1)
-            || (child.GetType() == typeof(Function) && ((Function)child).functionName == "break")) return 1;
-        }
-        return 0;
-    }
-
-    public int VisitAssign(Assign node)
-    {
-        string varName = node.left.value;
-        GLOBAL_SCOPE[varName] = Visit(node.right);
-        return 0;
-    }
-
-    public int VisitVar(Var node)
-    {
-        string varName = node.value;
-        
-        //if (node.type == Var.Type.CARD)
-        
-        if (GLOBAL_SCOPE.ContainsKey(varName))
-        {
-            return GLOBAL_SCOPE[varName];
-        }
-
-
-        Debug.Log("Variable '" + varName + "' not declared");
-        Debug.Break();
-        return 0;
-    }
-
-    public int VisitNoOp(NoOp node)
-    {
-        return 0;
-    }
-
-    /*public int VisitConditional(Conditional node)
-    {
-        if (node.type == Token.Type.IF)
-        {
-            if (MyTools.IntToBool(Visit(node.condition))) return Visit(node.body);
-            return 0;
-        }
-        if (node.type == Token.Type.WHILE)
-        {
-            while (MyTools.IntToBool(Visit(node.condition)))
-            {
-                if (Visit(node.body) == 1) break;
-            }
-            return 0;
-        }
-        Error();
-        return 0;
+        if (node.GetType() == typeof(BinOp)) VisitBinOp(node as BinOp);
+        if (node.GetType() == typeof(UnaryOp)) VisitUnaryOp(node as UnaryOp);
+        if (node.GetType() == typeof(Int)) VisitInt(node as Int);
+        if (node.GetType() == typeof(Bool)) VisitBool(node as Bool);
+        if (node.GetType() == typeof(String)) VisitString(node as String);
+        if (node.GetType() == typeof(Name)) VisitName(node as Name);
+        if (node.GetType() == typeof(CardNode)) VisitCardNode(node as CardNode);
+        if (node.GetType() == typeof(Type)) VisitType(node as Type);
+        if (node.GetType() == typeof(Faction)) VisitFaction(node as Faction);
+        if (node.GetType() == typeof(Power)) VisitPower(node as Power);
+        if (node.GetType() == typeof(Range)) VisitRange(node as Range);
+        if (node.GetType() == typeof(OnActivation)) VisitOnActivation(node as OnActivation);
+        if (node.GetType() == typeof(OnActivationElement)) VisitOnActivationElement(node as OnActivationElement);
+        if (node.GetType() == typeof(EffectOnActivation)) VisitEffectOnActivation(node as EffectOnActivation);
+        if (node.GetType() == typeof(PostAction)) VisitPostAction(node as PostAction);
+        if (node.GetType() == typeof(Selector)) VisitSelector(node as Selector);
+        if (node.GetType() == typeof(Single)) VisitSingle(node as Single);
+        if (node.GetType() == typeof(Source)) VisitSource(node as Source);
+        if (node.GetType() == typeof(Predicate)) VisitPredicate(node as Predicate);
+        if (node.GetType() == typeof(EffectNode)) VisitEffectNode(node as EffectNode);
+        if (node.GetType() == typeof(Action)) VisitAction(node as Action);
+        if (node.GetType() == typeof(Compound)) VisitCompound(node as Compound);
+        if (node.GetType() == typeof(IfNode)) VisitIfNode(node as IfNode);
+        if (node.GetType() == typeof(ForLoop)) VisitForLoop(node as ForLoop);
+        if (node.GetType() == typeof(WhileLoop)) VisitWhileLoop(node as WhileLoop);
+        if (node.GetType() == typeof(Function)) VisitFunction(node as Function);
+        if (node.GetType() == typeof(Assign)) VisitAssign(node as Assign);
+        if (node.GetType() == typeof(Var)) VisitVar(node as Var);
+        if (node.GetType() == typeof(VarComp)) VisitVarComp(node as VarComp);
+        if (node.GetType() == typeof(Args)) VisitArgs(node as Args);
+        if (node.GetType() == typeof(NoOp)) VisitNoOp(node as NoOp);
     }*/
 
-    public int VisitFunction(Function node)
+    public void Visit (AST node)
     {
-        List<int> args = new List<int>();
-
-        foreach (AST arg in node.args.args)
-        {
-            args.Add(Visit(arg));
-        }
-        return 0; //Commands.activate(node.functionName, args);
+        node.Print("");
     }
 
-    public int Interpret()
-    {
-        AST tree = parser.Parse();
-        return Visit(tree);
-    }
 }

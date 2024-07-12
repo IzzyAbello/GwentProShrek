@@ -1,0 +1,64 @@
+effect 
+{
+	Name: "Draw",
+	Action: (targets, context) =>
+	{
+		topCard = context.Deck.Pop();
+		context.Hand.Add(topCard);
+		context.Hand.Shuffle();
+	}
+}
+
+card
+{
+	Type: "Oro",
+	Name: "Beluga",
+	Faction: "Northern Realms",
+	Power: 10,
+	Range: ["Melee"],
+	OnActivation:
+	[
+		{
+			Effect:
+			{
+				Name: "Damage",
+				Amount: 5
+			},
+			Selector:
+			{
+				Source: "Board",
+				Single: false,
+				Predicate: (unit) => (unit.Faction == "Shrek")
+			},
+			PostAction:
+			{
+				Type: "ReturnToDeck",
+				Selector:
+				{
+					Source: "parent",
+					Single: false,
+					Predicate: (unit) => (unit.Power < 1)
+				}
+			}
+		},
+		{
+			Effect: {Name: "Draw"}
+		}
+	]
+}
+
+effect 
+{
+	Name: "ReturnToDeck",
+	Action: (targets, context) =>
+	{
+		for target in targets
+		{
+			owner = target.Owner;
+			deck = context.DeckOfPlayer(owner);
+			deck.Push(target);
+			deck.Shuffle();
+			context.Board.Remove(target);
+		};
+	}
+}

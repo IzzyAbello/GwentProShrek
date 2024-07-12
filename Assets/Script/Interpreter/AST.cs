@@ -34,9 +34,9 @@ public class BinOp : AST
     public override void Print(string height)
     {
         Debug.Log(height + "-Binary Operator:");
-        left.Print(height + "-Left Operand: \t");
+        if (left != null) left.Print(height + "\t-Left Operand: \t");
         Debug.Log(height + "-Operator: " + op.type.ToString() + " (" + op.value + ")");
-        right.Print(height + "-Right Operand: \t");
+        if (right != null) right.Print(height + "\t-Right Operand: \t");
     }
 }
 
@@ -55,7 +55,7 @@ public class UnaryOp : AST
     {
         Debug.Log(height + "-Unary Operator: ");
         Debug.Log(height + "-Operator: " + operation.type.ToString() + " (" + operation.value + ")");
-        expression.Print(height + "-Expression: \t");
+        if (expression != null) expression.Print(height + "-Expression: \t");
     }
 }
 
@@ -93,7 +93,7 @@ public class String : AST
 
     public override void Print(string height)
     {
-        Debug.Log(height + "-String: \nText: " + text);
+        if (text != null) Debug.Log(height + "-String: \nText: " + text);
     }
 }
 
@@ -131,7 +131,7 @@ public class Name : AST
 
     public override void Print(string height)
     {
-        Debug.Log(height + "-Name: " + name);
+        if (name != null) Debug.Log(height + "-Name: " + name);
     }
 }
 
@@ -171,12 +171,12 @@ public class CardNode : AST
     public override void Print(string height)
     {
         Debug.Log(height + "-Card: ");
-        name.Print(height + "\t");
-        type.Print(height + "\t");
-        faction.Print(height + "\t");
-        power.Print(height + "\t");
-        range.Print(height + "\t");
-        onActivation.Print(height + "\t");
+        if (name != null) name.Print(height + "\t");
+        if (type != null) type.Print(height + "\t");
+        if (faction != null) faction.Print(height + "\t");
+        if (power != null) power.Print(height + "\t");
+        if (range != null) range.Print(height + "\t");
+        if (onActivation != null) onActivation.Print(height + "\t");
     }
 }
 
@@ -191,7 +191,7 @@ public class Type : AST
 
     public override void Print(string height)
     {
-        Debug.Log(height + "-Type: " + type);
+        if (type != null) Debug.Log(height + "-Type: " + type);
     }
 }
 
@@ -206,7 +206,7 @@ public class Faction : AST
 
     public override void Print(string height)
     {
-        Debug.Log(height + "-Faction: " + faction);
+        if (faction != null) Debug.Log(height + "-Faction: " + faction);
     }
 }
 
@@ -225,6 +225,19 @@ public class Power : AST
     }
 }
 
+public class PowerAsField : AST
+{
+    public PowerAsField()
+    {
+
+    }
+
+    public override void Print(string height)
+    {
+        Debug.Log(height + "-Power as Field");
+    }
+}
+
 public class Range : AST
 {
     public string range;
@@ -236,7 +249,7 @@ public class Range : AST
 
     public override void Print(string height)
     {
-        Debug.Log(height + "-Range: " + range);
+        if (range != null) Debug.Log(height + "-Range: " + range);
     }
 }
 
@@ -246,7 +259,7 @@ public class OnActivation : AST
 
     public OnActivation()
     {
-        onActivation = null;
+        onActivation = new List<OnActivationElement>();
     }
 
     public OnActivation(List<OnActivationElement> onActivation)
@@ -257,7 +270,7 @@ public class OnActivation : AST
     public override void Print(string height)
     {
         Debug.Log(height + "-OnActivation: ");
-        foreach(OnActivationElement element in onActivation)
+        if (onActivation != null) foreach (OnActivationElement element in onActivation)
         {
             element.Print(height + "\t");
         }
@@ -269,6 +282,20 @@ public class OnActivationElement : AST
     public EffectOnActivation effectOnActivation;
     public Selector selector;
     public PostAction postAction;
+
+    public OnActivationElement(EffectOnActivation effectOnActivation)
+    {
+        this.effectOnActivation = effectOnActivation;
+        selector = null;
+        postAction = null;
+    }
+
+    public OnActivationElement(EffectOnActivation effectOnActivation, PostAction postAction)
+    {
+        this.effectOnActivation = effectOnActivation;
+        selector = null;
+        this.postAction = postAction;
+    }
 
     public OnActivationElement(EffectOnActivation effectOnActivation, Selector selector)
     {
@@ -287,8 +314,8 @@ public class OnActivationElement : AST
     public override void Print(string height)
     {
         Debug.Log(height + "-OnActivationELEMENT: ");
-        effectOnActivation.Print(height + "\t");
-        selector.Print(height + "\t");
+        if (effectOnActivation != null) effectOnActivation.Print(height + "\t");
+        if (selector != null) selector.Print(height + "\t");
         if (postAction != null) postAction.Print(height + "\t");
     }
 }
@@ -297,6 +324,12 @@ public class EffectOnActivation : AST
 {
     public Name name;
     public Args parameters;
+
+    public EffectOnActivation(Name name)
+    {
+        this.name = name;
+        parameters = null;
+    }
 
     public EffectOnActivation(Name name, Args parameters)
     {
@@ -307,8 +340,8 @@ public class EffectOnActivation : AST
     public override void Print(string height)
     {
         Debug.Log(height + "-EffectOnActivation: ");
-        name.Print(height + "\t");
-        parameters.Print(height + "\t");
+        if (name != null) name.Print(height + "\t");
+        if (parameters != null) parameters.Print(height + "\t");
     }
 }
 
@@ -332,7 +365,7 @@ public class PostAction : AST
     public override void Print(string height)
     {
         Debug.Log(height + "-PostAction: ");
-        type.Print(height + "\t");
+        if (type != null) type.Print(height + "\t");
         if (selector != null) selector.Print(height + "\t");
     }
 }
@@ -360,9 +393,9 @@ public class Selector : AST
     public override void Print(string height)
     {
         Debug.Log(height + "-Selector: ");
-        source.Print(height + "\t");
-        single.Print(height + "\t");
-        predicate.Print(height + "\t");
+        if (source != null) source.Print(height + "\t");
+        if (single != null) single.Print(height + "\t");
+        if (predicate != null) predicate.Print(height + "\t");
     }
 }
 
@@ -396,7 +429,7 @@ public class Source : AST
 
     public override void Print(string height)
     {
-        Debug.Log(height + "Source: " + source);
+        if (source != null) Debug.Log(height + "Source: " + source);
     }
 }
 
@@ -414,11 +447,10 @@ public class Predicate : AST
     public override void Print(string height)
     {
         Debug.Log(height + "-Predicate: ");
-        unit.Print(height + "\t");
-        condition.Print(height + "\t");
+        if (unit != null) unit.Print(height + "\t");
+        if (condition != null) condition.Print(height + "\t");
     }
 }
-
 
 /// <summary>
 /// 
@@ -448,9 +480,9 @@ public class EffectNode : AST
     public override void Print(string height)
     {
         Debug.Log(height + "-EffectNode: ");
-        name.Print(height + "\t");
+        if (name != null) name.Print(height + "\t");
         if (parameters != null) parameters.Print(height + "\t");
-        action.Print(height + "\t");
+        if (action != null) action.Print(height + "\t");
     }
 }
 
@@ -470,9 +502,9 @@ public class Action : AST
     public override void Print(string height)
     {
         Debug.Log(height + "-Action: ");
-        targets.Print(height + "-Targets: \t");
-        context.Print(height + "-Context: \t");
-        body.Print(height + "-Body: \t");
+        if (targets != null) targets.Print(height + "-Targets: \t");
+        if (context != null) context.Print(height + "-Context: \t");
+        if (body != null) body.Print(height + "-Body: \t");
     }
 }
 
@@ -492,9 +524,9 @@ public class Compound : AST
     public override void Print(string height)
     {
         Debug.Log(height + "-Compound:");
-        Debug.Log(height + "Children: ");
+        Debug.Log(height + "Childrens: " + children.Count);
 
-        foreach (AST child in children)
+        if (children != null) foreach (AST child in children)
             child.Print(height + '\t');
     }
 }
@@ -513,8 +545,8 @@ public class IfNode : AST
     public override void Print(string height)
     {
         Debug.Log(height + "-IfNode: ");
-        condition.Print(height + "-Condition: ");
-        body.Print(height + "-Body: \t");
+        if (condition != null) condition.Print(height + "-Condition: ");
+        if (body != null) body.Print(height + "-Body: \t");
     }
 }
 
@@ -533,9 +565,9 @@ public class ForLoop : AST
 
     public override void Print(string height)
     {
-        target.Print(height + "-Target: ");
-        targets.Print(height + "-Targets: ");
-        body.Print(height + "-Body: \t");
+        if (target != null) target.Print(height + "-Target: ");
+        if (targets != null) targets.Print(height + "-Targets: ");
+        if (body != null) body.Print(height + "-Body: \t");
     }
 }
 
@@ -553,8 +585,8 @@ public class WhileLoop : AST
     public override void Print(string height)
     {
         Debug.Log(height + "-WhileLoop: ");
-        condition.Print(height + "-Condition:");
-        body.Print(height + "-Body: \t");
+        if (condition != null) condition.Print(height + "-Condition:");
+        if (body != null) body.Print(height + "-Body: \t");
     }
 }
 
@@ -594,13 +626,15 @@ public class Function : AST
             type = Var.Type.VOID;
         if (functionName == "Shuffle")
             type = Var.Type.VOID;
+        if (functionName == "Add")
+            type = Var.Type.VOID;
     }
 
     public override void Print(string height)
     {
-        Debug.Log(height + "-Function " + functionName + ":");
-        Debug.Log("Type to return: " + type.ToString());
-        args.Print(height + "-Parameters: ");
+        if (functionName != null) Debug.Log(height + "-Function " + functionName + ":");
+        Debug.Log(height + "\t-Type to return: " + type.ToString());
+        if (args != null) args.Print(height + "\t-Parameters: ");
     }
 }
 
@@ -609,6 +643,7 @@ public class Assign : AST
     public Var left;
     public Token op;
     public AST right;
+
     public Assign(Var left, Token op, AST right)
     {
         this.left = left;
@@ -619,9 +654,9 @@ public class Assign : AST
     public override void Print(string height)
     {
         Debug.Log(height + "-Assignment:");
-        left.Print(height + "-Variable: \t");
+        if (left != null) left.Print(height + "\t-Variable: \t");
         Debug.Log(height + "-Operator: " + op.type.ToString() + " (" + op.value + ")");
-        right.Print(height + "-Value: \t");
+        if (right != null) right.Print(height + "\t-Value: \t");
     }
 }
 
@@ -675,14 +710,29 @@ public class VarComp : Var
 
     public override void Print(string height)
     {
+        Debug.Log(height + "-VarCompound:");
         base.Print(height);
-        foreach (AST ast in args)
+        if (args != null) foreach (AST ast in args)
         {
-            ast.Print(height);
+            ast.Print(height + "\t");
         }
     }
 }
 
+public class Pointer : AST
+{
+    public string pointer;
+
+    public Pointer(Token token)
+    {
+        pointer = token.value;
+    }
+
+    public override void Print(string height)
+    {
+        Debug.Log(height + "-POINTER: " + pointer);
+    }
+}
 /// <summary>
 /// 
 /// ARGS
@@ -706,7 +756,7 @@ public class Args : AST
     {
         Debug.Log(height + "-Arguments: ");
 
-        foreach (AST child in args)
+        if (args != null) foreach (AST child in args)
             child.Print(height + '\t');
     }
 }
