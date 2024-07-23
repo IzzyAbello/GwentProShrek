@@ -21,7 +21,7 @@ public class Token
         INT, BOOL, STRING, ID,
         
         // Operators
-        PLUS, MINUS, MULT, DIVIDE, MOD, POW, PLUS1, STRING_SUM, STRING_SUM_S, ASSIGN, 
+        PLUS, MINUS, MULT, DIVIDE, MOD, PLUSPLUS, MINUSMINUS, STRING_SUM, STRING_SUM_S, ASSIGN,
 
         // Keywords...
         IF, FOR, WHILE,  ACTION, CARD, EFFECT, NAME, PARAMS, TYPE, FACTION, POWER, RANGE,

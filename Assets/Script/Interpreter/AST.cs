@@ -14,21 +14,46 @@ public abstract class AST
     public abstract void Print(string height);
 }
 
+public abstract class ASTType : AST
+{
+    public enum Type
+    {
+        CONTEXT, CARD, FIELD, INT, STRING, BOOL, VOID, EFFECT, INDEXER, NULL
+    }
+    public Type type = Type.NULL;
+}
+
 /// <summary>
 /// 
 /// OPERATORS
 /// 
 /// </summary>
-public class BinOp : AST
+public class BinOp : ASTType
 {
-    public AST left;
+    public ASTType left;
     public Token op;
-    public AST right;
-    public BinOp(AST left, Token op, AST right)
+    public ASTType right;
+    
+    public BinOp(ASTType left, Token op, ASTType right)
     {
         this.left = left;
         this.op = op;
         this.right = right;
+        GetTypeOperator();
+    }
+
+    public void GetTypeOperator ()
+    {
+        if (op.type == Token.Type.PLUS || op.type == Token.Type.MINUS 
+            || op.type == Token.Type.MULT || op.type == Token.Type.DIVIDE
+            || op.type == Token.Type.MOD) type = Type.INT;
+
+        if (op.type == Token.Type.AND || op.type == Token.Type.OR
+            || op.type == Token.Type.GREATER || op.type == Token.Type.LESS
+            || op.type == Token.Type.GREATER_E || op.type == Token.Type.LESS_E
+            || op.type == Token.Type.EQUAL || op.type == Token.Type.DIFFER) type = Type.BOOL;
+
+        if (op.type == Token.Type.STRING_SUM || op.type == Token.Type.STRING_SUM_S) type = Type.STRING;
     }
 
     public override void Print(string height)
@@ -40,15 +65,23 @@ public class BinOp : AST
     }
 }
 
-public class UnaryOp : AST
+public class UnaryOp : ASTType
 {
     public Token operation;
-    public AST expression;
+    public ASTType expression;
 
-    public UnaryOp(Token operation, AST expression)
+    public UnaryOp(Token operation, ASTType expression)
     {
         this.operation = operation;
         this.expression = expression;
+        GetOpType();
+    }
+
+    public void GetOpType()
+    {
+        if (operation.type == Token.Type.NOT)
+            type = Type.BOOL;
+        else type = Type.INT;
     }
 
     public override void Print(string height)
@@ -64,7 +97,7 @@ public class UnaryOp : AST
 /// LITERALS
 /// 
 /// </summary>
-public class Int : AST
+public class Int : ASTType
 {
     public Token token;
     public int value;
@@ -72,6 +105,7 @@ public class Int : AST
     {
         this.token = token;
         value = int.Parse(token.value);
+        type = Type.INT;
     }
 
     public override void Print(string height)
@@ -80,7 +114,7 @@ public class Int : AST
     }
 }
 
-public class String : AST
+public class String : ASTType
 {
     public Token token;
     public string text;
@@ -89,6 +123,7 @@ public class String : AST
     {
         this.token = token;
         text = token.value;
+        type = Type.STRING;
     }
 
     public override void Print(string height)
@@ -97,7 +132,7 @@ public class String : AST
     }
 }
 
-public class Bool : AST
+public class Bool : ASTType
 {
     public Token token;
     public bool value;
@@ -106,6 +141,7 @@ public class Bool : AST
     {
         this.token = token;
         value = bool.Parse(token.value);
+        type = Type.BOOL;
     }
 
     public override void Print(string height)
@@ -139,10 +175,10 @@ public class Name : AST
 /// <summary>
 /// CARD PARAMS
 /// </summary>
-public class CardNode : AST
+public class CardNode : ASTType
 {
     public Name name;
-    public Type type;
+    public TypeNode typeNode;
     public Faction faction;
     public Power power;
     public Range range;
@@ -151,28 +187,30 @@ public class CardNode : AST
     public CardNode()
     {
         name = null;
-        type = null;
+        typeNode = null;
         faction = null;
         power = null;
         range = null;
         onActivation = null;
+        type = Type.NULL;
     }
 
-    public CardNode(Name name, Type type, Faction faction, Power power, Range range, OnActivation onActivation)
+    public CardNode(Name name, TypeNode typeNode, Faction faction, Power power, Range range, OnActivation onActivation)
     {
         this.name = name;
-        this.type = type;
+        this.typeNode = typeNode;
         this.faction = faction;
         this.power = power;
         this.range = range;
         this.onActivation = onActivation;
+        type = Type.CARD;
     }
 
     public override void Print(string height)
     {
         Debug.Log(height + "-Card: ");
         if (name != null) name.Print(height + "\t");
-        if (type != null) type.Print(height + "\t");
+        if (typeNode != null) typeNode.Print(height + "\t");
         if (faction != null) faction.Print(height + "\t");
         if (power != null) power.Print(height + "\t");
         if (range != null) range.Print(height + "\t");
@@ -180,18 +218,18 @@ public class CardNode : AST
     }
 }
 
-public class Type : AST
+public class TypeNode : AST
 {
     public string type;
 
-    public Type (Token token)
+    public TypeNode (Token token)
     {
         type = token.value;
     }
 
     public override void Print(string height)
     {
-        if (type != null) Debug.Log(height + "-Type: " + type);
+        if (type != null) Debug.Log(height + "-Type Node: " + type);
     }
 }
 
@@ -347,25 +385,25 @@ public class EffectOnActivation : AST
 
 public class PostAction : AST
 {
-    public Type type;
+    public EffectOnActivation effectOnActivation;
     public Selector selector;
 
-    public PostAction(Type type)
+    public PostAction(EffectOnActivation effectOnActivation)
     {
-        this.type = type;
+        this.effectOnActivation = effectOnActivation;
         selector = null;
     }
 
-    public PostAction(Type type, Selector selector)
+    public PostAction(EffectOnActivation effectOnActivation, Selector selector)
     {
-        this.type = type;
+        this.effectOnActivation = effectOnActivation;
         this.selector = selector;
     }
 
     public override void Print(string height)
     {
         Debug.Log(height + "-PostAction: ");
-        if (type != null) type.Print(height + "\t");
+        if (effectOnActivation != null) effectOnActivation.Print(height + "\t");
         if (selector != null) selector.Print(height + "\t");
     }
 }
@@ -457,7 +495,7 @@ public class Predicate : AST
 /// EFFECT PARAMS
 /// 
 /// </summary>
-public class EffectNode : AST
+public class EffectNode : ASTType
 {
     public Name name;
     public Args parameters;
@@ -468,6 +506,7 @@ public class EffectNode : AST
         this.name = name;
         parameters = null;
         this.action = action;
+        type = Type.EFFECT;
     }
 
     public EffectNode(Name name, Args parameters, Action action)
@@ -475,6 +514,7 @@ public class EffectNode : AST
         this.name = name;
         this.parameters = parameters;
         this.action = action;
+        type = Type.EFFECT;
     }
 
     public override void Print(string height)
@@ -590,44 +630,42 @@ public class WhileLoop : AST
     }
 }
 
-public class Function : AST
+public class Function : ASTType
 {
     public string functionName;
     public Args args;
-    public Var.Type type;
 
     public Function(string functionName, Args args)
     {
         this.functionName = functionName;
         this.args = args;
-        type = Var.Type.NULL;
         TypeToReturn();
     }
 
     public void TypeToReturn()
     {
         if (functionName == "FieldOfPlayer")
-            type = Var.Type.CONTEXT;
+            type = Type.CONTEXT;
         if (functionName == "HandOfPlayer")
-            type = Var.Type.FIELD;
+            type = Type.FIELD;
         if (functionName == "GraveyardOfPlayer")
-            type = Var.Type.FIELD;
+            type = Type.FIELD;
         if (functionName == "DeckOfPlayer")
-            type = Var.Type.FIELD;
+            type = Type.FIELD;
         if (functionName == "Find")
-            type = Var.Type.TARGETS;
+            type = Type.FIELD;
         if (functionName == "Push")
-            type = Var.Type.VOID;
+            type = Type.VOID;
         if (functionName == "SendBottom")
-            type = Var.Type.VOID;
-        if (functionName == "Pop")
-            type = Var.Type.CARD;
+            type = Type.VOID;
         if (functionName == "Remove")
-            type = Var.Type.VOID;
+            type = Type.VOID;
         if (functionName == "Shuffle")
-            type = Var.Type.VOID;
+            type = Type.VOID;
         if (functionName == "Add")
-            type = Var.Type.VOID;
+            type = Type.VOID;
+        if (functionName == "Pop")
+            type = Type.CARD;
     }
 
     public override void Print(string height)
@@ -642,9 +680,9 @@ public class Assign : AST
 {
     public Var left;
     public Token op;
-    public AST right;
+    public ASTType right;
 
-    public Assign(Var left, Token op, AST right)
+    public Assign(Var left, Token op, ASTType right)
     {
         this.left = left;
         this.op = op;
@@ -655,7 +693,7 @@ public class Assign : AST
     {
         Debug.Log(height + "-Assignment:");
         if (left != null) left.Print(height + "\t-Variable: \t");
-        Debug.Log(height + "-Operator: " + op.type.ToString() + " (" + op.value + ")");
+        Debug.Log(height + "-Assign Operator: " + op.type.ToString() + " (" + op.value + ")");
         if (right != null) right.Print(height + "\t-Value: \t");
     }
 }
@@ -665,22 +703,30 @@ public class Assign : AST
 /// VAR
 /// 
 /// </summary>
-public class Var : AST
+public class Var : ASTType
 {
-    public enum Type
-    {
-        TARGETS, CONTEXT, CARD, FIELD, INT, STRING, BOOL, VOID, NULL
-    }
-
     public Token token;
     public string value;
-    public Type type;
 
     public Var(Token token)
     {
         this.token = token;
         value = token.value;
         type = Type.NULL;
+    }
+
+    public Var(Token token, Token.Type type) //////////////////////////////////////////
+    {
+        this.token = token;
+        value = token.value;
+        TypeInParams(type);
+    }
+
+    public Var(Token token, Type type)
+    {
+        this.token = token;
+        value = token.value;
+        this.type = type;
     }
 
     public void TypeInParams(Token.Type t)
@@ -701,11 +747,11 @@ public class Var : AST
 
 public class VarComp : Var
 {
-    public List<AST> args;
+    public List<ASTType> args;
 
     public VarComp(Token token) : base(token)
     {
-        args = new List<AST>();
+        args = new List<ASTType>();
     }
 
     public override void Print(string height)
@@ -719,18 +765,36 @@ public class VarComp : Var
     }
 }
 
-public class Pointer : AST
+public class Pointer : ASTType
 {
     public string pointer;
 
     public Pointer(Token token)
     {
         pointer = token.value;
+        type = Type.FIELD;
     }
 
     public override void Print(string height)
     {
         Debug.Log(height + "-POINTER: " + pointer);
+    }
+}
+
+public class Indexer : ASTType
+{
+    public ASTType index;
+
+    public Indexer (ASTType index)
+    {
+        this.index = index;
+        type = Type.INDEXER;
+    }
+
+    public override void Print(string height)
+    {
+        Debug.Log(height + "-Indexer: ");
+        if (index != null) index.Print(height + "\t-Index: ");
     }
 }
 /// <summary>
@@ -761,8 +825,13 @@ public class Args : AST
     }
 }
 
-public class NoOp : AST
+public class NoOp : ASTType
 {
+    public NoOp()
+    {
+
+    }
+
     public override void Print(string height)
     {
         Debug.Log(height + "-Empty");

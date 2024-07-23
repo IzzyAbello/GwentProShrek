@@ -24,7 +24,6 @@ public class Lexer
         }
     }
 
-
     public Lexer(string text)
     {
         this.text = text;
@@ -33,6 +32,7 @@ public class Lexer
         column = 0;
         currentChar = text[0];
 
+        reservedKeywords["if"] = new Token(Token.Type.IF, "if");
         reservedKeywords["while"] = new Token(Token.Type.WHILE, "while");
         reservedKeywords["for"] = new Token(Token.Type.FOR, "for");
         reservedKeywords["in"] = new Token(Token.Type.IN, "in");
@@ -86,11 +86,16 @@ public class Lexer
         reservedKeywords["Predicate"] = new Token(Token.Type.PREDICATE, "Predicate");
     }
 
-    public void Error()
+    public void Error(string errorTag)
     {
-        Debug.Log("Invalid character '" + currentChar + "' at position " + row + " " + column);
-        Debug.Log("Code:");
-        Debug.Log(text);
+        string error ="Invalid character '" + currentChar + "' at position " + row + " " + column + "\n";
+        error += "Error Tag: " + errorTag + "\n";
+        error += "Code:\n";
+        error += (text.Substring(0, pos)) + "\n";
+        error += "-----------------------------ERROR-----------------------------\n";
+        error += (text.Substring(pos)) + "\n";
+
+        Debug.Log(error);
     }
 
     public void Advance()
@@ -136,10 +141,21 @@ public class Lexer
     public string GetString()
     {
         string result = "";
-        while (currentChar != '\0' && currentChar != '\"')
+        while (currentChar != '\"')
         {
+
+            if (currentChar == '\r' || currentChar == '\n')
+            {
+                Error("Invalid char in String... You may miss:  ( \" ) ");
+                break;
+            }
             result += currentChar;
             Advance();
+            if (currentChar == '\0')
+            {
+                Error("Cannot find the end of string... You may miss: \" ");
+                break;
+            }
         }
         return result;
     }
@@ -191,7 +207,13 @@ public class Lexer
             {
                 Advance(); Advance();
 
-                Token token = new Token(Token.Type.PLUS1, "++");
+                Token token = new Token(Token.Type.PLUSPLUS, "++");
+                return token;
+            }
+            if (currentChar == '+' && Peek() == '=')
+            {
+                Advance(); Advance();
+                Token token = new Token(Token.Type.ASSIGN, "+=");
                 return token;
             }
             if (currentChar == '+')
@@ -200,10 +222,28 @@ public class Lexer
                 Token token = new Token(Token.Type.PLUS, "+");
                 return token;
             }
+            if (currentChar == '-' && Peek() == '-')
+            {
+                Advance(); Advance();
+                Token token = new Token(Token.Type.MINUSMINUS, "--");
+                return token;
+            }
+            if (currentChar == '-' && Peek() == '=')
+            {
+                Advance(); Advance();
+                Token token = new Token(Token.Type.ASSIGN, "-=");
+                return token;
+            }
             if (currentChar == '-')
             {
                 Advance();
                 Token token = new Token(Token.Type.MINUS, "-");
+                return token;
+            }
+            if (currentChar == '*' && Peek() == '=')
+            {
+                Advance(); Advance();
+                Token token = new Token(Token.Type.ASSIGN, "*=");
                 return token;
             }
             if (currentChar == '*')
@@ -212,10 +252,22 @@ public class Lexer
                 Token token = new Token(Token.Type.MULT, "*");
                 return token;
             }
+            if (currentChar == '/' && Peek() == '=')
+            {
+                Advance(); Advance();
+                Token token = new Token(Token.Type.ASSIGN, "/=");
+                return token;
+            }
             if (currentChar == '/')
             {
                 Advance();
                 Token token = new Token(Token.Type.DIVIDE, "/");
+                return token;
+            }
+            if (currentChar == '%' && Peek() == '=')
+            {
+                Advance(); Advance();
+                Token token = new Token(Token.Type.ASSIGN, "%=");
                 return token;
             }
             if (currentChar == '%')
@@ -224,17 +276,17 @@ public class Lexer
                 Token token = new Token(Token.Type.MOD, "%");
                 return token;
             }
-            if (currentChar == '^')
-            {
-                Advance();
-                Token token = new Token(Token.Type.POW, "^");
-                return token;
-            }
             if (currentChar == '@' && Peek() == '@')
             {
                 Advance(); Advance();
 
                 Token token = new Token(Token.Type.STRING_SUM_S, "@@");
+                return token;
+            }
+            if (currentChar == '@' && Peek() == '=')
+            {
+                Advance(); Advance();
+                Token token = new Token(Token.Type.ASSIGN, "@=");
                 return token;
             }
             if (currentChar == '@')
@@ -382,7 +434,8 @@ public class Lexer
                 Advance();
                 return token;
             }
-            Error();
+            Error("Invalid character found: " + currentChar);
+            Advance();
         }
 
         Token eof = new Token(Token.Type.EOF, "");

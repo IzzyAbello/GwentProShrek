@@ -7,17 +7,24 @@ public class Parser
     public Lexer lexer;
     public Token currentToken;
     public string curError;
+    public Dictionary<string, ASTType.Type> GLOBAL_SCOPE;
 
     public Parser(Lexer lexer)
     {
         this.lexer = lexer;
         currentToken = lexer.GetNextToken();
         curError = "";
+        GLOBAL_SCOPE = new Dictionary<string, ASTType.Type>();
     }
 
-    public void Error()
+    public bool IsInScope(Var variable)
     {
-        curError = "Invalid syntax\n";
+        return GLOBAL_SCOPE.ContainsKey(variable.value);
+    }
+
+    public void Error(string errorTag)
+    {
+        curError = $"Invalid syntax in    Ln {lexer.row}    Col {lexer.column}\n \t {errorTag} \n";
         curError += "Current token type: " + currentToken.type + "\n";
         curError += "Current token value: " + currentToken.value + "\n";
         curError += "Code:\n";
@@ -27,6 +34,43 @@ public class Parser
         Debug.Log(curError);
     }
 
+    public void ErrorRepeat()
+    {
+        Error($"Found invalid repetition of field {currentToken.type} in current context");
+        Eat(currentToken.type);
+    }
+
+    public void ErrorNotCorrespondingField()
+    {
+        Error($"Invalid syntax in current context of {currentToken.type.ToString()} token");
+        Eat(currentToken.type);
+    }
+
+    public void ErrorInNodeCreation(AST node)
+    {
+        Error($"Invalid construction of {node.GetType().ToString()} maybe you miss fields of {node.GetType().ToString()}");
+    }
+
+    public void ErrorInUnaryOp(UnaryOp node)
+    {
+        Error($"Unvalid use of Unary Operator ({node.operation.value}) in {node.expression.type}  cannot convert {node.expression.type} to {node.type}");
+    }
+
+    public void ErrorInBinOp(BinOp node)
+    {
+        Error($"Invalid Binary Operator: Operator '{node.op.value}' cannot be applied to operands of type '{node.left.type}' and '{node.right.type}'");
+    }
+
+    public void ErrorHasNotBeenDeclared(Var variable)
+    {
+        Error($"Variable '{variable.value}' has not been declared");
+    }
+
+    public void ErrorInAssignment(Assign assign)
+    {
+        Error($"Invalid Assignment, cannot convert {assign.left.type}  to  {assign.right.type}");
+    }
+    
     public void Eat(Token.Type tokenType)
     {
         try
@@ -53,21 +97,37 @@ public class Parser
         }
     }
 
-    public AST Factor()
+    public bool IsPossibleUnaryOp(UnaryOp node)
+    {
+        return (node.type == node.expression.type);
+    }
+
+    public bool IsPossibleBinOp(BinOp node)
+    {
+        if (node.left.type == node.right.type)
+        {
+            if (node.type == ASTType.Type.BOOL)
+            {
+                if (node.op.type == Token.Type.EQUAL || node.op.type == Token.Type.DIFFER) return true;
+                else return (node.left.type == ASTType.Type.INT);
+            }
+            else return (node.left.type == node.type);
+        }
+        
+        return false;
+    }
+
+    public ASTType Factor()
     {
         try
         {
             Token token = currentToken;
-            if (token.type == Token.Type.PLUS)
+            if (token.type == Token.Type.PLUS || token.type == Token.Type.MINUS)
             {
-                Eat(Token.Type.PLUS);
-                UnaryOp node = new UnaryOp(token, Factor());
-                return node;
-            }
-            if (token.type == Token.Type.MINUS)
-            {
-                Eat(Token.Type.MINUS);
-                UnaryOp node = new UnaryOp(token, Factor());
+                Eat(token.type);
+                ASTType factor = Factor();
+                UnaryOp node = new UnaryOp(token, factor);
+                if (!IsPossibleUnaryOp(node)) ErrorInUnaryOp(node);
                 return node;
             }
             if (token.type == Token.Type.BOOL)
@@ -91,19 +151,32 @@ public class Parser
             if (token.type == Token.Type.L_PARENTHESIS)
             {
                 Eat(Token.Type.L_PARENTHESIS);
-                AST result = Expression();
+                ASTType result = Expression();
                 Eat(Token.Type.R_PARENTHESIS);
                 return result;
             }
             if (currentToken.type == Token.Type.ID)
             {
-                return Variable();
+                Var node = Variable();
+                if (node.GetType() == typeof(Var) && IsInScope(node)) ErrorHasNotBeenDeclared(node);
+                token = currentToken;
+                if (token.type == Token.Type.PLUSPLUS || token.type == Token.Type.MINUSMINUS)
+                {
+                    UnaryOp unode = new UnaryOp(token, node);
+                    if (node.type != ASTType.Type.INT) ErrorInUnaryOp(unode);
+                    Eat(token.type);
+                    return unode;
+                }
+                return node;
             }
+
+            // FIND NODE FOR FIND FUNCTION
+
             if (currentToken.type == Token.Type.FUNCTION)
             {
                 return FunctionStatement(currentToken.value);
             }
-            Error();
+            Error($"Invalid Factor: {token.value}");
             return new NoOp();
         }
         catch (System.Exception)
@@ -112,16 +185,17 @@ public class Parser
         }
     }
 
-    public AST Term()
+    public ASTType Term()
     {
         try
         {
-            AST node = Factor();
+            ASTType node = Factor();
             Token token = currentToken;
             if (token.type == Token.Type.MULT || token.type == Token.Type.DIVIDE || token.type == Token.Type.MOD)
             {
                 Eat(token.type);
                 node = new BinOp(node, token, Expression());
+                if (!IsPossibleBinOp(node as BinOp)) ErrorInBinOp(node as BinOp);
             }
             return node;
         }
@@ -131,16 +205,18 @@ public class Parser
         }
     }
 
-    public AST Expression()
+    public ASTType Expression()
     {
         try
         {
-            AST node = Term();
+            ASTType node = Term();
             Token token = currentToken;
-            if (token.type == Token.Type.PLUS || token.type == Token.Type.MINUS)
+            if (token.type == Token.Type.PLUS || token.type == Token.Type.MINUS ||
+                token.type == Token.Type.STRING_SUM || token.type == Token.Type.STRING_SUM_S)
             {
                 Eat(token.type);
                 node = new BinOp(node, token, Expression());
+                if (!IsPossibleBinOp(node as BinOp)) ErrorInBinOp(node as BinOp);
             }
             return node;
         }
@@ -150,7 +226,7 @@ public class Parser
         }
     }
 
-    public AST BooleanFactor()
+    public ASTType BooleanFactor()
     {
         try
         {
@@ -160,18 +236,19 @@ public class Parser
                 Eat(Token.Type.NOT);
                 Eat(Token.Type.L_PARENTHESIS);
                 UnaryOp unaryOp = new UnaryOp(token, BooleanExpression());
+                if (!IsPossibleUnaryOp(unaryOp)) ErrorInUnaryOp(unaryOp);
                 Eat(Token.Type.R_PARENTHESIS);
                 return unaryOp;
             }
             if (token.type == Token.Type.L_PARENTHESIS)
             {
                 Eat(Token.Type.L_PARENTHESIS);
-                AST result = BooleanExpression();
+                ASTType result = BooleanExpression();
                 Eat(Token.Type.R_PARENTHESIS);
                 return result;
             }
 
-            AST left = Expression();
+            ASTType left = Expression();
 
             token = currentToken;
             if (token.type == Token.Type.EQUAL) Eat(Token.Type.EQUAL);
@@ -181,9 +258,9 @@ public class Parser
             else if (token.type == Token.Type.LESS) Eat(Token.Type.LESS);
             else if (token.type == Token.Type.GREATER) Eat(Token.Type.GREATER);
             else if (token.type == Token.Type.R_PARENTHESIS) return left;
-            else Error();
+            else Error($"Invalid Boolean operator: '{token.value}'");
 
-            AST right = Expression();
+            ASTType right = Expression();
 
             BinOp node = new BinOp(left, token, right);
             return node;
@@ -194,17 +271,18 @@ public class Parser
         }
     }
 
-    public AST BooleanTerm()
+    public ASTType BooleanTerm()
     {
         try
         {
-            AST node = BooleanFactor();
+            ASTType node = BooleanFactor();
             Token token = currentToken;
 
             if (token.type == Token.Type.OR)
             {
                 Eat(Token.Type.OR);
-                return new BinOp(node, token, BooleanExpression());
+                node = new BinOp(node, token, BooleanExpression());
+                if (!IsPossibleBinOp(node as BinOp)) ErrorInBinOp(node as BinOp);
             }
             return node;
         }
@@ -214,17 +292,18 @@ public class Parser
         }
     }
 
-    public AST BooleanExpression()
+    public ASTType BooleanExpression()
     {
         try
         {
-            AST node = BooleanTerm();
+            ASTType node = BooleanTerm();
             Token token = currentToken;
 
             if (token.type == Token.Type.AND)
             {
                 Eat(Token.Type.AND);
                 node = new BinOp(node, token, BooleanExpression());
+                if (!IsPossibleBinOp(node as BinOp)) ErrorInBinOp(node as BinOp);
             }
             return node;
         }
@@ -234,16 +313,37 @@ public class Parser
         }
     }
 
-    public Var Variable()// Look for this... 
+    public bool IsValidIndexer(Indexer node)
+    {
+        return (node.index.type == ASTType.Type.INT);
+    }
+
+    public Indexer IndexerParse()
+    {
+        try
+        {
+            Eat(Token.Type.L_SQ_BRACKET);
+            ASTType index = Expression();
+            Eat(Token.Type.R_SQ_BRACKET);
+            Indexer node = new Indexer(index);
+            if (!IsValidIndexer(node)) Error("Invalid indexer: Expression must be type 'INT'");
+            return node;
+        }
+        catch (System.Exception)
+        {
+            throw;
+        }
+    }
+
+    public Var Variable() 
     {
         try
         {
             Var node = new Var(currentToken);
             Eat(Token.Type.ID);
-
-            if (currentToken.type == Token.Type.DOT)
+            VarComp nd = new VarComp(node.token);
+            if (currentToken.type == Token.Type.DOT || currentToken.type == Token.Type.L_SQ_BRACKET)
             {
-                VarComp nd = new VarComp(node.token);
                 while (currentToken.type == Token.Type.DOT && currentToken.type != Token.Type.EOF)
                 {
                     Eat(Token.Type.DOT);
@@ -251,61 +351,118 @@ public class Parser
                     {
                         Function f = FunctionStatement(currentToken.value);
                         nd.args.Add(f);
+                        if (currentToken.type == Token.Type.L_SQ_BRACKET)
+                        {
+                            nd.args.Add(IndexerParse());
+                        }
                     }
-                    else // Look for this...
+                    else
                     {
                         Token token = currentToken;
-                        if (token.type == Token.Type.TYPE)
+                        if (token.type == Token.Type.TYPE || token.type == Token.Type.NAME || token.type == Token.Type.FACTION
+                            || token.type == Token.Type.POWER || token.type == Token.Type.RANGE)
                         {
                             Eat(token.type);
-                            Type v = new Type(token);
-                            nd.args.Add(v);
-                        }
-                        else if (token.type == Token.Type.NAME)
-                        {
-                            Eat(token.type);
-                            Name v = new Name(token);
-                            nd.args.Add(v);
-                        }
-                        else if (token.type == Token.Type.FACTION)
-                        {
-                            Eat(token.type);
-                            Faction v = new Faction(token);
-                            nd.args.Add(v);
-                        }
-                        else if (token.type == Token.Type.POWER)
-                        {
-                            Eat(token.type);
-                            PowerAsField v = new PowerAsField();
-                            nd.args.Add(v);
-                        }
-                        else if (token.type == Token.Type.RANGE)
-                        {
-                            Eat(token.type);
-                            Range v = new Range(token);
+                            Var v = new Var(token, ASTType.Type.STRING);
+                            if (token.type == Token.Type.POWER) v.type = ASTType.Type.INT;
                             nd.args.Add(v);
                         }
                         else if (token.type == Token.Type.POINTER)
                         {
                             Eat(token.type);
-                            Pointer v = new Pointer(token);
-                            nd.args.Add(v);
+                            Pointer pointer = new Pointer(token);
+                            nd.args.Add(pointer);
+                            if (currentToken.type == Token.Type.L_SQ_BRACKET)
+                            {
+                                nd.args.Add(IndexerParse());
+                            }
                         }
                         else
                         {
-                            Error();
+                            Error($"Invalid Field: '{currentToken.value}'");
                             Eat(currentToken.type);
                         }
                     }
                 }
                 node = nd;
             }
+            else if (currentToken.type == Token.Type.L_SQ_BRACKET)
+            {
+                Eat(Token.Type.L_SQ_BRACKET);
+                ASTType index = Expression();
+                Eat(Token.Type.R_SQ_BRACKET);
+                Indexer indexer = new Indexer(index);
+                nd.args.Add(indexer);
+                node = nd;
+            }
+
+            if (node.GetType() == typeof(Var))
+            {
+                if (IsInScope(node)) node.type = GLOBAL_SCOPE[node.value];
+            }
+            else if (!IsInScope(node)) ErrorHasNotBeenDeclared(node);
+            else
+            {
+                VarComp vc = node as VarComp;
+                if (IsPossibleVarComp(vc))
+                    vc.type = vc.args[vc.args.Count - 1].type;
+            }
+
             return node;
         }
         catch (System.Exception)
         {
             throw;
         }
+    }
+
+    public bool IsPossibleVarComp(VarComp v)
+    {
+        for (int i = 0; i < v.args.Count; i++)
+        {
+            if (i == 0)
+            {
+                if (!InternalIsPossibleVarComp(GLOBAL_SCOPE[v.value], v.args[i])) return false;
+            }
+            else if (!InternalIsPossibleVarComp(v.args[i - 1].type, v.args[i])) return false;
+        }
+        return true;
+    }
+
+    public bool IsFunction(ASTType node)
+    {
+        return (node.GetType() == typeof(Function));
+    }
+
+    public bool InternalIsPossibleVarComp(ASTType.Type fatherType, ASTType v)
+    {
+        if (fatherType == ASTType.Type.CONTEXT)
+        {
+            if (v.GetType() == typeof(Pointer))
+            {
+                Pointer p = v as Pointer;
+                string s = p.pointer;
+                return (s == "Hand" || s == "Graveyard" || s == "Deck" || s == "Melee" || s == "Range" || s == "Siege");
+            }
+            else if (IsFunction(v)) return (v.type == ASTType.Type.CONTEXT || v.type == ASTType.Type.FIELD);
+        }
+
+        if (fatherType == ASTType.Type.FIELD)
+        {
+            if (v.GetType() == typeof(Indexer)) return true;
+            else if (IsFunction(v)) return (v.type == ASTType.Type.VOID || v.type == ASTType.Type.CARD);
+        }
+
+        if (fatherType == ASTType.Type.CARD && v.GetType() == typeof(Var))
+        {
+            Var vv = v as Var;
+            string s = vv.value;
+            return (s == "Type" || s == "Name" || s == "Faction" || s == "Range" || s == "Power");
+        }
+
+        Error($"Invalid VarComp construction: '{v.ToString()}' is not a field of '{fatherType.ToString()}'");
+
+        return false;
     }
 
     public Assign AssignmentStatement(Var variable)
@@ -315,7 +472,7 @@ public class Parser
             Var left = variable;
             Token token = currentToken;
             Eat(Token.Type.ASSIGN);
-            AST right = Expression();
+            ASTType right = Expression();
             Assign node = new Assign(left, token, right);
             return node;
         }
@@ -407,10 +564,20 @@ public class Parser
         }
     }
 
-    public AST Statement() // FIX THIS 
+    public void ErrorInvalidIDStatement()
+    {
+        Error("Only assignment, call, increment, decrement, await, and new object expressions can be used as a statement");
+    }
+
+    public AST Statement() 
     {
         try
         {
+            if (currentToken.type == Token.Type.SEMI)
+            {
+                return new NoOp();
+            }
+
             if (currentToken.type == Token.Type.WHILE)
             {
                 return WhileLoopStatement();
@@ -432,32 +599,56 @@ public class Parser
                 return node;
             }
 
-            if (currentToken.type == Token.Type.ID) // And this...
+            if (currentToken.type == Token.Type.ID)
             {
                 Var variable = Variable();
-
-                if (variable.GetType() == typeof(VarComp) && currentToken.type == Token.Type.SEMI) // THIS
+                if (variable.GetType() == typeof(VarComp) && currentToken.type == Token.Type.SEMI)
                 {
                     VarComp v = variable as VarComp;
-                    if (v.args[v.args.Count - 1].GetType() == typeof(Function))
+                    int count = v.args.Count - 1;
+                    if (v.args[count].GetType() == typeof(Function))
                     {
-                        Function f = v.args[v.args.Count - 1] as Function;
-                        if (f.type != Var.Type.VOID) Error();
+                        Function f = v.args[count] as Function;
+                        if (f.type != Var.Type.VOID) ErrorInvalidIDStatement();
                     }
-                    else Error();
+                    else ErrorInvalidIDStatement();
 
-                    return variable as VarComp;
+                    return variable;
                 }
                 else if (currentToken.type == Token.Type.ASSIGN)
                 {
                     Assign node = AssignmentStatement(variable);
+                    if (variable.GetType() == typeof(Var))
+                    {
+                        if (!IsInScope(variable))
+                        {
+                            variable.type = node.right.type;
+                            GLOBAL_SCOPE[variable.value] = variable.type;
+                        }
+                        else if (variable.type != node.right.type) ErrorInAssignment(node);
+                    }
+                    else
+                    {
+                        if (!IsInScope(variable)) ErrorHasNotBeenDeclared(variable);
+                        else if (variable.type != node.right.type) ErrorInAssignment(node); 
+                    }
+                    
+                    return node;
+                }
+                else if (currentToken.type == Token.Type.MINUSMINUS || currentToken.type == Token.Type.PLUSPLUS)
+                {
+                    UnaryOp node = new UnaryOp(currentToken, variable);
+                    if (variable.type != ASTType.Type.INT) ErrorInUnaryOp(node); 
+                    Eat(currentToken.type);
                     return node;
                 }
 
+                Error($"Invalid Statement: token {currentToken.type}");
                 return new NoOp();
             }
 
-            Error();
+            Error($"Invalid Statement: token {currentToken.type}");
+            Eat(currentToken.type);
             return new NoOp();
         }
         catch (System.Exception)
@@ -509,13 +700,13 @@ public class Parser
         }
     }
 
-    public Type TypeParse()
+    public TypeNode TypeParse()
     {
         try
         {
             Eat(Token.Type.TYPE);
             Eat(Token.Type.COLON);
-            Type node = new Type(currentToken);
+            TypeNode node = new TypeNode(currentToken);
             Eat(Token.Type.STRING);
             return node;
         }
@@ -595,28 +786,28 @@ public class Parser
                         name = NameParse();
                         if (currentToken.type != Token.Type.R_BRACKET) Eat(Token.Type.COMA);
                     }
-                    else Error();
+                    else ErrorRepeat();
                 }
                 else if (currentToken.type == Token.Type.ID)
                 {
                     Var variable = Variable();
                     Token token = currentToken;
                     Eat(Token.Type.COLON);
-                    AST value = Expression();
+                    ASTType value = Expression();
                     Assign param = new Assign(variable, token, value);
                     parameters.Add(param);
                     if (currentToken.type != Token.Type.R_BRACKET) Eat(Token.Type.COMA);
                 }
-                else { Error(); Eat(currentToken.type); }
+                else ErrorNotCorrespondingField();
             }
             Eat(Token.Type.R_BRACKET);
-
-            if (name == null) Error();
 
             EffectOnActivation node;
             if (parameters.args.Count == 0)
                 node = new EffectOnActivation(name);
             else node = new EffectOnActivation(name, parameters);
+
+            if (name == null) ErrorInNodeCreation(node);
 
             return node;
         }
@@ -672,13 +863,14 @@ public class Parser
 
             Eat(Token.Type.L_PARENTHESIS);
             Var unit = Variable();
-            unit.type = Var.Type.CARD;
+            unit.type = ASTType.Type.CARD;
+            if (IsInScope(unit) || unit.GetType() == typeof(VarComp)) ErrorUnvalidAssignment(unit);
             Eat(Token.Type.R_PARENTHESIS);
 
             Eat(Token.Type.ARROW);
 
             Eat(Token.Type.L_PARENTHESIS);
-            AST condition = BooleanExpression();
+            ASTType condition = BooleanExpression();
             Eat(Token.Type.R_PARENTHESIS);
 
             Predicate node = new Predicate(unit, condition);
@@ -712,7 +904,7 @@ public class Parser
                         source = SourceParse();
                         if (currentToken.type != Token.Type.R_BRACKET) Eat(Token.Type.COMA);
                     }
-                    else Error();
+                    else ErrorRepeat();
                 }
                 else if (currentToken.type == Token.Type.SINGLE)
                 {
@@ -721,7 +913,7 @@ public class Parser
                         single = SingleParse();
                         if (currentToken.type != Token.Type.R_BRACKET) Eat(Token.Type.COMA);
                     }
-                    else Error();
+                    else ErrorRepeat();
                 }
                 else if (currentToken.type == Token.Type.PREDICATE)
                 {
@@ -730,17 +922,17 @@ public class Parser
                         predicate = PredicateParse();
                         if (currentToken.type != Token.Type.R_BRACKET) Eat(Token.Type.COMA);
                     }
-                    else Error();
+                    else ErrorRepeat();
                 }
-                else { Error(); Eat(currentToken.type); }
+                else ErrorNotCorrespondingField();
             }
             Eat(Token.Type.R_BRACKET);
-
-            if (source == null || predicate == null) Error();
 
             Selector node;
             if (single == null) node = new Selector(source, predicate);
             else node = new Selector(source, single, predicate);
+
+            if (source == null || predicate == null) ErrorInNodeCreation(node);
 
             return node;
         }
@@ -759,19 +951,19 @@ public class Parser
 
             Eat(Token.Type.L_BRACKET);
 
-            Type type = null;
+            EffectOnActivation effectOnActivation = null;
             Selector selector = null;
 
             while (currentToken.type != Token.Type.R_BRACKET && currentToken.type != Token.Type.EOF)
             {
-                if (currentToken.type == Token.Type.TYPE)
+                if (currentToken.type == Token.Type.OA_EFFECT)
                 {
-                    if (type == null)
+                    if (effectOnActivation == null)
                     {
-                        type = TypeParse();
+                        effectOnActivation = EffectOnActivationParse();
                         if (currentToken.type != Token.Type.R_BRACKET) Eat(Token.Type.COMA);
                     }
-                    else Error();
+                    else ErrorRepeat();
                 }
                 else if (currentToken.type == Token.Type.SELECTOR)
                 {
@@ -780,17 +972,17 @@ public class Parser
                         selector = SelectorParse();
                         if (currentToken.type != Token.Type.R_BRACKET) Eat(Token.Type.COMA);
                     }
-                    else Error();
+                    else ErrorRepeat();
                 }
-                else Error();
+                else ErrorNotCorrespondingField();
             }
             Eat(Token.Type.R_BRACKET);
 
-            if (type == null) Error();
-
             PostAction node;
-            if (selector == null) node = new PostAction(type);
-            else node = new PostAction(type, selector);
+            if (selector == null) node = new PostAction(effectOnActivation);
+            else node = new PostAction(effectOnActivation, selector);
+
+            if (effectOnActivation == null) ErrorInNodeCreation(node);
 
             return node;
         }
@@ -819,7 +1011,7 @@ public class Parser
                         effectOnActivation = EffectOnActivationParse();
                         if (currentToken.type != Token.Type.R_BRACKET) Eat(Token.Type.COMA);
                     }
-                    else Error();
+                    else ErrorRepeat();
                 }
                 else if (currentToken.type == Token.Type.SELECTOR)
                 {
@@ -828,7 +1020,7 @@ public class Parser
                         selector = SelectorParse();
                         if (currentToken.type != Token.Type.R_BRACKET) Eat(Token.Type.COMA);
                     }
-                    else Error();
+                    else ErrorRepeat();
                 }
                 else if (currentToken.type == Token.Type.POSTACTION)
                 {
@@ -837,20 +1029,19 @@ public class Parser
                         postAction = PostActionParse();
                         if (currentToken.type != Token.Type.R_BRACKET) Eat(Token.Type.COMA);
                     }
-                    else Error();
+                    else ErrorRepeat();
                 }
-                else { Error(); Eat(currentToken.type); }
+                else ErrorNotCorrespondingField();
             }
             Eat(Token.Type.R_BRACKET);
-
-
-            if (effectOnActivation == null) Error();
 
             OnActivationElement node;
             if (selector == null && postAction == null) node = new OnActivationElement(effectOnActivation);
             else if (postAction == null) node = new OnActivationElement(effectOnActivation, selector);
             else if (selector == null) node = new OnActivationElement(effectOnActivation, postAction);
             else node = new OnActivationElement(effectOnActivation, selector, postAction);
+
+            if (effectOnActivation == null) ErrorInNodeCreation(node);
 
             return node;
         }
@@ -874,7 +1065,7 @@ public class Parser
                     nodes.Add(node);
                     if (currentToken.type != Token.Type.R_SQ_BRACKET) Eat(Token.Type.COMA);
                 }
-                else Error();
+                else ErrorNotCorrespondingField();
             }
 
             return nodes;
@@ -917,7 +1108,7 @@ public class Parser
             Eat(Token.Type.L_BRACKET);
 
             Name name = null;
-            Type type = null;
+            TypeNode type = null;
             Faction faction = null;
             Power power = null;
             Range range = null;
@@ -932,7 +1123,7 @@ public class Parser
                         name = NameParse();
                         if (currentToken.type != Token.Type.R_BRACKET) Eat(Token.Type.COMA);
                     }
-                    else Error();
+                    else ErrorRepeat();
                 }
                 else if (currentToken.type == Token.Type.TYPE)
                 {
@@ -941,7 +1132,7 @@ public class Parser
                         type = TypeParse();
                         if (currentToken.type != Token.Type.R_BRACKET) Eat(Token.Type.COMA);
                     }
-                    else Error();
+                    else ErrorRepeat();
                 }
                 else if (currentToken.type == Token.Type.FACTION)
                 {
@@ -950,7 +1141,7 @@ public class Parser
                         faction = FactionParse();
                         if (currentToken.type != Token.Type.R_BRACKET) Eat(Token.Type.COMA);
                     }
-                    else Error();
+                    else ErrorRepeat();
                 }
                 else if (currentToken.type == Token.Type.POWER)
                 {
@@ -959,7 +1150,7 @@ public class Parser
                         power = PowerParse();
                         if (currentToken.type != Token.Type.R_BRACKET) Eat(Token.Type.COMA);
                     }
-                    else Error();
+                    else ErrorRepeat();
                 }
                 else if (currentToken.type == Token.Type.RANGE)
                 {
@@ -968,7 +1159,7 @@ public class Parser
                         range = RangeParse();
                         if (currentToken.type != Token.Type.R_BRACKET) Eat(Token.Type.COMA);
                     }
-                    else Error();
+                    else ErrorRepeat();
                 }
                 else if (currentToken.type == Token.Type.ONACTIVATION)
                 {
@@ -977,19 +1168,17 @@ public class Parser
                         onActivation = OnActivationParse();
                         if (currentToken.type != Token.Type.R_BRACKET) Eat(Token.Type.COMA);
                     }
-                    else Error();
+                    else ErrorRepeat();
                 }
-                else { Error();  Eat(currentToken.type); }
+                else ErrorNotCorrespondingField();
             }
             Eat(Token.Type.R_BRACKET);
 
+            CardNode node = new CardNode(name, type, faction, power, range, onActivation);
+
             List<AST> listOfParameters = new List<AST> { name, type, faction, power, range, onActivation };
             foreach (AST child in listOfParameters)
-            {
-                if (child == null) Error();
-            }
-
-            CardNode node = new CardNode(name, type, faction, power, range, onActivation);
+                if (child == null) { ErrorInNodeCreation(node); break; }
 
             return node;
         }
@@ -1006,6 +1195,7 @@ public class Parser
             Eat(Token.Type.NAME);
             Eat(Token.Type.COLON);
             Name node = new Name(currentToken);
+            if (node.name == "") Error("Name must not be an empty string");
             Eat(Token.Type.STRING);
             return node;
 
@@ -1025,6 +1215,7 @@ public class Parser
             while (currentToken.type != Token.Type.R_BRACKET && currentToken.type != Token.Type.EOF)
             {
                 Var variable = Variable();
+                if (variable.GetType() == typeof(VarComp)) Error("Invalid declaration of param");
                 Eat(Token.Type.COLON);
                 if (currentToken.type == Token.Type.D_INT ||
                     currentToken.type == Token.Type.D_STRING ||
@@ -1040,8 +1231,9 @@ public class Parser
                 }
                 else
                 {
-                    Error();
-                    return args;
+                    Error($"Invalid Type '{currentToken.value}' found in current context\n Expecting 'STRING', 'BOOL', 'Number'");
+                    Eat(currentToken.type);
+                    if (currentToken.type == Token.Type.COMA) Eat(currentToken.type);
                 }
             }
             return args;
@@ -1069,6 +1261,11 @@ public class Parser
         }
     }
 
+    public void ErrorUnvalidAssignment(Var variable)
+    {
+        Error($"Unvalid Assignment of '{variable.value}'");
+    }
+
     public Action ActionParse()
     {
         try
@@ -1079,12 +1276,15 @@ public class Parser
             Eat(Token.Type.L_PARENTHESIS);
 
             Var targets = Variable();
-            targets.type = Var.Type.TARGETS;
+            targets.type = ASTType.Type.FIELD;
+            if (IsInScope(targets) || targets.GetType() == typeof(VarComp)) ErrorUnvalidAssignment(targets);
 
             Eat(Token.Type.COMA);
 
             Var context = Variable();
-            context.type = Var.Type.CONTEXT;
+            context.type = ASTType.Type.CONTEXT;
+            if (IsInScope(context) || context.GetType() == typeof(VarComp)) ErrorUnvalidAssignment(context);
+            
 
             Eat(Token.Type.R_PARENTHESIS);
             Eat(Token.Type.ARROW);
@@ -1122,7 +1322,7 @@ public class Parser
                         if (currentToken.type != Token.Type.R_BRACKET)
                             Eat(Token.Type.COMA);
                     }
-                    else Error();
+                    else ErrorRepeat();
                 }
                 else if (currentToken.type == Token.Type.PARAMS)
                 {
@@ -1132,7 +1332,7 @@ public class Parser
                         if (currentToken.type != Token.Type.R_BRACKET)
                             Eat(Token.Type.COMA);
                     }
-                    else Error();
+                    else ErrorRepeat();
                 }
                 else if (currentToken.type == Token.Type.ACTION)
                 {
@@ -1142,17 +1342,12 @@ public class Parser
                         if (currentToken.type != Token.Type.R_BRACKET)
                             Eat(Token.Type.COMA);
                     }
-                    else Error();
+                    else ErrorRepeat();
                 }
-                else { Error(); Eat(currentToken.type); }
+                else ErrorNotCorrespondingField();
             }
 
             Eat(Token.Type.R_BRACKET);
-
-            if (name == null || action == null)
-            {
-                Error();
-            }
 
             EffectNode node;
             if (parameters == null)
@@ -1162,6 +1357,11 @@ public class Parser
             else
             {
                 node = new EffectNode(name, parameters, action);
+            }
+
+            if (name == null || action == null)
+            {
+                ErrorInNodeCreation(node);
             }
 
             return node;
@@ -1190,9 +1390,9 @@ public class Parser
                     EffectNode node = EffectCreation();
                     listOfCardAndEffect.Add(node);
                 }
-                else 
+                else
                 {
-                    Error();
+                    Error($"Expecting (card) or (effect) token, found: {currentToken.type.ToString()}");
                     Eat(currentToken.type);
                 }
             }
@@ -1233,7 +1433,7 @@ public class Parser
             Compound node = Program();
             if (currentToken.type != Token.Type.EOF)
             {
-                Error();
+                Error("Cannot parse all of text");
             }
 
             node.Print("");

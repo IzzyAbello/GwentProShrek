@@ -88,6 +88,7 @@
     <Compile Include="Assets\Script\Interpreter\Lexer.cs" />
     <Compile Include="Assets\Script\Interpreter\MyTools.cs" />
     <Compile Include="Assets\Script\Interpreter\Parser.cs" />
+    <Compile Include="Assets\Script\Interpreter\Semantic.cs" />
     <Compile Include="Assets\Script\Interpreter\Token.cs" />
     <Compile Include="Assets\Script\LeaderCardDisplay.cs" />
     <Compile Include="Assets\Script\LeaderEffectBad.cs" />

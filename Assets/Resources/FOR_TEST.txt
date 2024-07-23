@@ -1,3 +1,24 @@
+
+/////////////////////// CODIGOS SIN ERRORES //////////////////////////////////////////////////////
+
+effect
+{
+	Name: "Damage",
+	Params: {Amount: Number},
+	Action: (t, c) =>
+	{
+		for tt in t
+		{
+			i = 0;
+			while (i < Amount)
+			{
+				i = i + 1;
+				tt.Power = tt.Power - 1;
+			};
+		};
+	}
+}
+
 effect 
 {
 	Name: "Draw",
@@ -6,22 +27,6 @@ effect
 		topCard = context.Deck.Pop();
 		context.Hand.Add(topCard);
 		context.Hand.Shuffle();
-	}
-}
-
-effect 
-{
-	Name: "ReturnToDeck",
-	Action: (targets, context) =>
-	{
-		for target in targets
-		{
-			owner = target.Owner;
-			deck = context.DeckOfPlayer(owner);
-			deck.Push(target);
-			deck.Shuffle();
-			context.Board.Remove(target);
-		};
 	}
 }
 
@@ -48,7 +53,7 @@ card
 			},
 			PostAction:
 			{
-				Type: "ReturnToDeck",
+				Effect:{ "ReturnToDeck" },
 				Selector:
 				{
 					Source: "parent",
@@ -62,3 +67,56 @@ card
 		}
 	]
 }
+
+effect 
+{
+	Name: "ReturnToDeck",
+	Action: (targets, context) =>
+	{
+		for target in targets
+		{
+			owner = target.Owner;
+			deck = context.DeckOfPlayer(owner);
+			deck.Push(target);
+			deck.Shuffle();
+			context.Board.Remove(target);
+		};
+	}
+}
+
+
+card
+{
+	Type: "Oro",
+	Name: "Triss",
+	Faction: "Northern Realms",
+	Power: 12,
+	Range: ["Ranged"],
+	OnActivation:
+	[
+		{
+			Effect: { Name: "Draw" },
+			Selector:
+			{
+				Source: "Deck",
+				Single: true,
+				Predicate: (unit) => (true)
+			},
+			PostAction:
+			{
+				Effect:{ Name: "Damage", amount: 5 },
+				Selector:
+				{
+					Source: "Board",
+					Single: false,
+					Predicate: (unit) => (unit.Power < 5)
+				}
+			}
+		}
+	]
+}
+
+////////////////////////////////////// CODIGOS CON ERRORES ////////////////////////////////////////////
+
+
+			
