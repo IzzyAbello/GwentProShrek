@@ -58,11 +58,11 @@ public class Lexer
         reservedKeywords["Owner"] = new Token(Token.Type.POINTER, "Owner");
         reservedKeywords["Board"] = new Token(Token.Type.POINTER, "Board");
 
+        reservedKeywords["Find"] = new Token(Token.Type.FUNCTION, "Find");
         reservedKeywords["HandOfPlayer"] = new Token(Token.Type.FUNCTION, "HandOfPlayer");
         reservedKeywords["FieldOfPlayer"] = new Token(Token.Type.FUNCTION, "FieldOfPlayer");
         reservedKeywords["GraveyardOfPlayer"] = new Token(Token.Type.FUNCTION, "GraveyardOfPlayer");
         reservedKeywords["DeckOfPlayer"] = new Token(Token.Type.FUNCTION, "DeckOfPlayer");
-        reservedKeywords["Find"] = new Token(Token.Type.FUNCTION, "Find");
         reservedKeywords["Push"] = new Token(Token.Type.FUNCTION, "Push");
         reservedKeywords["SendBottom"] = new Token(Token.Type.FUNCTION, "SendBottom");
         reservedKeywords["Pop"] = new Token(Token.Type.FUNCTION, "Pop");

@@ -7,24 +7,21 @@ public class Parser
     public Lexer lexer;
     public Token currentToken;
     public string curError;
-    public Dictionary<string, ASTType.Type> GLOBAL_SCOPE;
+    public Scope GLOBAL_SCOPE;
+    public Dictionary<string, EffectNode> EFFECT_LIST;
 
     public Parser(Lexer lexer)
     {
         this.lexer = lexer;
         currentToken = lexer.GetNextToken();
         curError = "";
-        GLOBAL_SCOPE = new Dictionary<string, ASTType.Type>();
-    }
-
-    public bool IsInScope(Var variable)
-    {
-        return GLOBAL_SCOPE.ContainsKey(variable.value);
+        GLOBAL_SCOPE = new Scope();
+        EFFECT_LIST = new Dictionary<string, EffectNode>();
     }
 
     public void Error(string errorTag)
     {
-        curError = $"Invalid syntax in    Ln {lexer.row}    Col {lexer.column}\n \t {errorTag} \n";
+        curError = $"Invalid syntax in Ln {lexer.row}  Col {lexer.column}\n {errorTag} \n";
         curError += "Current token type: " + currentToken.type + "\n";
         curError += "Current token value: " + currentToken.value + "\n";
         curError += "Code:\n";
@@ -32,6 +29,11 @@ public class Parser
         curError += "-----------------------------ERROR-----------------------------\n";
         curError += (lexer.text.Substring(lexer.pos)) + "\n";
         Debug.Log(curError);
+    }
+
+    public void CrashLog(int line)
+    {
+        Debug.Log("Crash in line: " + line.ToString());
     }
 
     public void ErrorRepeat()
@@ -70,7 +72,7 @@ public class Parser
     {
         Error($"Invalid Assignment, cannot convert {assign.left.type}  to  {assign.right.type}");
     }
-    
+
     public void Eat(Token.Type tokenType)
     {
         try
@@ -108,16 +110,18 @@ public class Parser
         {
             if (node.type == ASTType.Type.BOOL)
             {
+                if (node.left.type == ASTType.Type.BOOL && (node.op.type == Token.Type.OR || node.op.type == Token.Type.AND))
+                    return true;
                 if (node.op.type == Token.Type.EQUAL || node.op.type == Token.Type.DIFFER) return true;
                 else return (node.left.type == ASTType.Type.INT);
             }
             else return (node.left.type == node.type);
         }
-        
+
         return false;
     }
 
-    public ASTType Factor()
+    public ASTType Factor(Scope scope)
     {
         try
         {
@@ -125,7 +129,7 @@ public class Parser
             if (token.type == Token.Type.PLUS || token.type == Token.Type.MINUS)
             {
                 Eat(token.type);
-                ASTType factor = Factor();
+                ASTType factor = Factor(scope);
                 UnaryOp node = new UnaryOp(token, factor);
                 if (!IsPossibleUnaryOp(node)) ErrorInUnaryOp(node);
                 return node;
@@ -151,14 +155,14 @@ public class Parser
             if (token.type == Token.Type.L_PARENTHESIS)
             {
                 Eat(Token.Type.L_PARENTHESIS);
-                ASTType result = Expression();
+                ASTType result = Expression(scope);
                 Eat(Token.Type.R_PARENTHESIS);
                 return result;
             }
             if (currentToken.type == Token.Type.ID)
             {
-                Var node = Variable();
-                if (node.GetType() == typeof(Var) && IsInScope(node)) ErrorHasNotBeenDeclared(node);
+                Var node = Variable(scope);
+                if (node.GetType() == typeof(Var) && !scope.IsInScope(node)) ErrorHasNotBeenDeclared(node);
                 token = currentToken;
                 if (token.type == Token.Type.PLUSPLUS || token.type == Token.Type.MINUSMINUS)
                 {
@@ -170,63 +174,66 @@ public class Parser
                 return node;
             }
 
-            // FIND NODE FOR FIND FUNCTION
-
             if (currentToken.type == Token.Type.FUNCTION)
             {
-                return FunctionStatement(currentToken.value);
+                return FunctionStatement(currentToken.value, scope);
             }
+
+
             Error($"Invalid Factor: {token.value}");
             return new NoOp();
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(188);
             throw;
         }
     }
 
-    public ASTType Term()
+    public ASTType Term(Scope scope)
     {
         try
         {
-            ASTType node = Factor();
+            ASTType node = Factor(scope);
             Token token = currentToken;
             if (token.type == Token.Type.MULT || token.type == Token.Type.DIVIDE || token.type == Token.Type.MOD)
             {
                 Eat(token.type);
-                node = new BinOp(node, token, Expression());
+                node = new BinOp(node, token, Expression(scope));
                 if (!IsPossibleBinOp(node as BinOp)) ErrorInBinOp(node as BinOp);
             }
             return node;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(209);
             throw;
         }
     }
 
-    public ASTType Expression()
+    public ASTType Expression(Scope scope)
     {
         try
         {
-            ASTType node = Term();
+            ASTType node = Term(scope);
             Token token = currentToken;
             if (token.type == Token.Type.PLUS || token.type == Token.Type.MINUS ||
                 token.type == Token.Type.STRING_SUM || token.type == Token.Type.STRING_SUM_S)
             {
                 Eat(token.type);
-                node = new BinOp(node, token, Expression());
+                node = new BinOp(node, token, Expression(scope));
                 if (!IsPossibleBinOp(node as BinOp)) ErrorInBinOp(node as BinOp);
             }
             return node;
         }
         catch (System.Exception)
         {
+            CrashLog(231);
             throw;
         }
     }
 
-    public ASTType BooleanFactor()
+    public ASTType BooleanFactor(Scope scope)
     {
         try
         {
@@ -235,7 +242,7 @@ public class Parser
             {
                 Eat(Token.Type.NOT);
                 Eat(Token.Type.L_PARENTHESIS);
-                UnaryOp unaryOp = new UnaryOp(token, BooleanExpression());
+                UnaryOp unaryOp = new UnaryOp(token, BooleanExpression(scope));
                 if (!IsPossibleUnaryOp(unaryOp)) ErrorInUnaryOp(unaryOp);
                 Eat(Token.Type.R_PARENTHESIS);
                 return unaryOp;
@@ -243,12 +250,12 @@ public class Parser
             if (token.type == Token.Type.L_PARENTHESIS)
             {
                 Eat(Token.Type.L_PARENTHESIS);
-                ASTType result = BooleanExpression();
+                ASTType result = BooleanExpression(scope);
                 Eat(Token.Type.R_PARENTHESIS);
                 return result;
             }
 
-            ASTType left = Expression();
+            ASTType left = Expression(scope);
 
             token = currentToken;
             if (token.type == Token.Type.EQUAL) Eat(Token.Type.EQUAL);
@@ -257,73 +264,78 @@ public class Parser
             else if (token.type == Token.Type.LESS_E) Eat(Token.Type.LESS_E);
             else if (token.type == Token.Type.LESS) Eat(Token.Type.LESS);
             else if (token.type == Token.Type.GREATER) Eat(Token.Type.GREATER);
-            else if (token.type == Token.Type.R_PARENTHESIS) return left;
+            else if (token.type == Token.Type.R_PARENTHESIS ||
+                token.type == Token.Type.AND || token.type == Token.Type.OR) return left;
             else Error($"Invalid Boolean operator: '{token.value}'");
 
-            ASTType right = Expression();
+            ASTType right = Expression(scope);
 
             BinOp node = new BinOp(left, token, right);
+            if (!IsPossibleBinOp(node as BinOp)) ErrorInBinOp(node as BinOp);
             return node;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(278);
             throw;
         }
     }
 
-    public ASTType BooleanTerm()
+    public ASTType BooleanTerm(Scope scope)
     {
         try
         {
-            ASTType node = BooleanFactor();
+            ASTType node = BooleanFactor(scope);
             Token token = currentToken;
 
             if (token.type == Token.Type.OR)
             {
                 Eat(Token.Type.OR);
-                node = new BinOp(node, token, BooleanExpression());
+                node = new BinOp(node, token, BooleanExpression(scope));
                 if (!IsPossibleBinOp(node as BinOp)) ErrorInBinOp(node as BinOp);
             }
             return node;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(300);
             throw;
         }
     }
 
-    public ASTType BooleanExpression()
+    public ASTType BooleanExpression(Scope scope)
     {
         try
         {
-            ASTType node = BooleanTerm();
+            ASTType node = BooleanTerm(scope);
             Token token = currentToken;
 
             if (token.type == Token.Type.AND)
             {
                 Eat(Token.Type.AND);
-                node = new BinOp(node, token, BooleanExpression());
+                node = new BinOp(node, token, BooleanExpression(scope));
                 if (!IsPossibleBinOp(node as BinOp)) ErrorInBinOp(node as BinOp);
             }
             return node;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(322);
             throw;
         }
     }
 
     public bool IsValidIndexer(Indexer node)
     {
-        return (node.index.type == ASTType.Type.INT);
+        return node.index.type == ASTType.Type.INT;
     }
 
-    public Indexer IndexerParse()
+    public Indexer IndexerParse(Scope scope)
     {
         try
         {
             Eat(Token.Type.L_SQ_BRACKET);
-            ASTType index = Expression();
+            ASTType index = Expression(scope);
             Eat(Token.Type.R_SQ_BRACKET);
             Indexer node = new Indexer(index);
             if (!IsValidIndexer(node)) Error("Invalid indexer: Expression must be type 'INT'");
@@ -331,11 +343,12 @@ public class Parser
         }
         catch (System.Exception)
         {
+            CrashLog(345);
             throw;
         }
     }
 
-    public Var Variable() 
+    public Var Variable(Scope scope)
     {
         try
         {
@@ -344,23 +357,30 @@ public class Parser
             VarComp nd = new VarComp(node.token);
             if (currentToken.type == Token.Type.DOT || currentToken.type == Token.Type.L_SQ_BRACKET)
             {
+                if (currentToken.type == Token.Type.L_SQ_BRACKET)
+                {
+                    Indexer indexer = IndexerParse(scope);
+                    nd.args.Add(indexer);
+                }
+
                 while (currentToken.type == Token.Type.DOT && currentToken.type != Token.Type.EOF)
                 {
                     Eat(Token.Type.DOT);
                     if (currentToken.type == Token.Type.FUNCTION)
                     {
-                        Function f = FunctionStatement(currentToken.value);
+                        Function f = FunctionStatement(currentToken.value, scope);
                         nd.args.Add(f);
                         if (currentToken.type == Token.Type.L_SQ_BRACKET)
                         {
-                            nd.args.Add(IndexerParse());
+                            nd.args.Add(IndexerParse(scope));
                         }
                     }
                     else
                     {
                         Token token = currentToken;
-                        if (token.type == Token.Type.TYPE || token.type == Token.Type.NAME || token.type == Token.Type.FACTION
-                            || token.type == Token.Type.POWER || token.type == Token.Type.RANGE)
+                        if (token.type == Token.Type.TYPE || token.type == Token.Type.NAME ||
+                            token.type == Token.Type.FACTION || token.type == Token.Type.POWER ||
+                            token.type == Token.Type.RANGE)
                         {
                             Eat(token.type);
                             Var v = new Var(token, ASTType.Type.STRING);
@@ -374,7 +394,7 @@ public class Parser
                             nd.args.Add(pointer);
                             if (currentToken.type == Token.Type.L_SQ_BRACKET)
                             {
-                                nd.args.Add(IndexerParse());
+                                nd.args.Add(IndexerParse(scope));
                             }
                         }
                         else
@@ -384,45 +404,41 @@ public class Parser
                         }
                     }
                 }
-                node = nd;
-            }
-            else if (currentToken.type == Token.Type.L_SQ_BRACKET)
-            {
-                Eat(Token.Type.L_SQ_BRACKET);
-                ASTType index = Expression();
-                Eat(Token.Type.R_SQ_BRACKET);
-                Indexer indexer = new Indexer(index);
-                nd.args.Add(indexer);
+
                 node = nd;
             }
 
             if (node.GetType() == typeof(Var))
             {
-                if (IsInScope(node)) node.type = GLOBAL_SCOPE[node.value];
+                if (scope.IsInScope(node)) node.type = scope.Get(node);
             }
-            else if (!IsInScope(node)) ErrorHasNotBeenDeclared(node);
+            else if (!scope.IsInScope(node)) ErrorHasNotBeenDeclared(node);
             else
             {
                 VarComp vc = node as VarComp;
-                if (IsPossibleVarComp(vc))
-                    vc.type = vc.args[vc.args.Count - 1].type;
+                if (IsPossibleVarComp(vc, scope))
+                {
+                    ASTType.Type lastType = vc.args[vc.args.Count - 1].type;
+                    vc.type = (lastType == ASTType.Type.INDEXER) ? ASTType.Type.CARD : lastType;
+                }
             }
 
             return node;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(425);
             throw;
         }
     }
 
-    public bool IsPossibleVarComp(VarComp v)
+    public bool IsPossibleVarComp(VarComp v, Scope scope)
     {
         for (int i = 0; i < v.args.Count; i++)
         {
             if (i == 0)
             {
-                if (!InternalIsPossibleVarComp(GLOBAL_SCOPE[v.value], v.args[i])) return false;
+                if (!InternalIsPossibleVarComp(scope.Get(v.value), v.args[i])) return false;
             }
             else if (!InternalIsPossibleVarComp(v.args[i - 1].type, v.args[i])) return false;
         }
@@ -442,7 +458,8 @@ public class Parser
             {
                 Pointer p = v as Pointer;
                 string s = p.pointer;
-                return (s == "Hand" || s == "Graveyard" || s == "Deck" || s == "Melee" || s == "Range" || s == "Siege");
+                return (s == "Hand" || s == "Graveyard" || s == "Deck" ||
+                    s == "Melee" || s == "Range" || s == "Siege");
             }
             else if (IsFunction(v)) return (v.type == ASTType.Type.CONTEXT || v.type == ASTType.Type.FIELD);
         }
@@ -450,126 +467,286 @@ public class Parser
         if (fatherType == ASTType.Type.FIELD)
         {
             if (v.GetType() == typeof(Indexer)) return true;
-            else if (IsFunction(v)) return (v.type == ASTType.Type.VOID || v.type == ASTType.Type.CARD);
+            else if (IsFunction(v)) return (v.type == ASTType.Type.FIELD ||
+                    v.type == ASTType.Type.VOID || v.type == ASTType.Type.CARD);
         }
 
-        if (fatherType == ASTType.Type.CARD && v.GetType() == typeof(Var))
+        if (fatherType == ASTType.Type.INDEXER || fatherType == ASTType.Type.CARD)
         {
-            Var vv = v as Var;
-            string s = vv.value;
-            return (s == "Type" || s == "Name" || s == "Faction" || s == "Range" || s == "Power");
+            if (v.GetType() == typeof(Var))
+            {
+                Var vv = v as Var;
+                string s = vv.value;
+                return (s == "Type" || s == "Name" || s == "Faction" || s == "Range" || s == "Power" || s == "Owner");
+            }
+            else if (v.GetType() == typeof(Pointer))
+            {
+                Pointer p = v as Pointer;
+                string s = p.pointer;
+                return s == "Owner";
+            }
+            else return false;
         }
 
-        Error($"Invalid VarComp construction: '{v.ToString()}' is not a field of '{fatherType.ToString()}'");
+        if (fatherType == ASTType.Type.EFFECT)
+        {
+            var vv = v as Var;
+            string s = vv.value;
+            return (s == "Name");
+        }
+
+        Error($"Invalid VarComp construction: '{v.ToString()}' is not a valid field of type '{fatherType.ToString()}'");
 
         return false;
     }
 
-    public Assign AssignmentStatement(Var variable)
+    public Assign AssignmentStatement(Var variable, Scope scope)
     {
         try
         {
             Var left = variable;
             Token token = currentToken;
             Eat(Token.Type.ASSIGN);
-            ASTType right = Expression();
+            ASTType right = Expression(scope);
             Assign node = new Assign(left, token, right);
+
+
+            if (token.value != "=")
+            {
+                if (!scope.IsInScope(variable)) ErrorHasNotBeenDeclared(variable);
+                else if ((token.value == "+=" || token.value == "-=" || token.value == "*=" ||
+                    token.value == "/=" || token.value == "%=")
+                    && (variable.type == node.right.type && variable.type != ASTType.Type.INT))
+                    ErrorInAssignment(node);
+                else if ((token.value == "@=") &&
+                    (variable.type == node.right.type && variable.type != ASTType.Type.STRING))
+                    ErrorInAssignment(node);
+            }
+
+            if (variable.GetType() == typeof(Var))
+            {
+                if (!scope.IsInScope(variable))
+                {
+                    variable.type = node.right.type;
+                    scope.Set(variable, variable.type);
+                }
+                else if (variable.type != node.right.type) ErrorInAssignment(node);
+            }
+            else
+            {
+                if (!scope.IsInScope(variable)) ErrorHasNotBeenDeclared(variable);
+                else if (variable.type != node.right.type) ErrorInAssignment(node);
+            }
+
             return node;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(540);
             throw;
         }
     }
 
-    public Function FunctionStatement(string name)
+    public void ErrorInvalidParameterInFunction(string functionName)
+    {
+        Error($"Invalid parameter for Function '{functionName}'");
+    }
+
+    public Function FindFunction(Scope outScope)
     {
         try
         {
-            Args args = new Args();
-            Eat(Token.Type.FUNCTION);
+            Scope scope = new Scope(outScope);
+
             Eat(Token.Type.L_PARENTHESIS);
 
-            while (currentToken.type != Token.Type.R_PARENTHESIS && currentToken.type != Token.Type.EOF)
+            Var variable = Variable(scope);
+            if (scope.IsInScope(variable) || variable.GetType() == typeof(VarComp)) 
+                ErrorInvalidParameterInFunction("Find");
+            else
             {
-                AST currentArg = Expression();
-                args.Add(currentArg);
-
-                if (currentToken.type != Token.Type.R_PARENTHESIS)
-                    Eat(Token.Type.COMA);
+                variable.type = ASTType.Type.CARD;
+                scope.Set(variable, variable.type);
             }
+            
             Eat(Token.Type.R_PARENTHESIS);
 
-            Function node = new Function(name, args);
+            Eat(Token.Type.ARROW);
+
+            Eat(Token.Type.L_PARENTHESIS);
+            ASTType condition = BooleanExpression(scope);
+            Eat(Token.Type.R_PARENTHESIS);
+
+            Eat(Token.Type.R_PARENTHESIS);
+
+            Args predicate = new Args();
+            predicate.Add(variable);
+            predicate.Add(condition);
+
+            Function node = new Function("Find", predicate);
             return node;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(586);
             throw;
         }
     }
 
-    public ForLoop ForLoopStatement()
+    public Function GetPlayerFunction (string name, Scope scope)
+    {
+        try
+        {
+            Var player = Variable(scope);
+            if (!scope.IsInScope(player) || player.type != ASTType.Type.FIELD) 
+                ErrorInvalidParameterInFunction(name);
+            Args args = new Args();
+            args.Add(player);
+            Function node = new Function(name, args);
+            Eat(Token.Type.R_PARENTHESIS);
+            return node;
+        }
+        catch
+        {
+            CrashLog(606);
+            throw;
+        }
+    }
+
+    public Function NoParametersFunction (string name)
+    {
+        try
+        {
+            Function node = new Function(name);
+            Eat(Token.Type.R_PARENTHESIS);
+            return node;
+        }
+        catch
+        {
+            CrashLog(621);
+            throw;
+        }
+    }
+
+    public Function CardParameterFunction (string name, Scope scope)
+    {
+        try
+        {
+            Var card = Variable(scope);
+            if (!scope.IsInScope(card) || card.type != ASTType.Type.CARD)
+                ErrorInvalidParameterInFunction(name);
+            Args args = new Args();
+            args.Add(card);
+            Function node = new Function(name, args);
+            Eat(Token.Type.R_PARENTHESIS);
+            return node;
+        }
+        catch
+        {
+            CrashLog(641);
+            throw;
+        }
+    }
+
+    public Function FunctionStatement(string name, Scope scope)
+    {
+        try
+        {
+            Eat(Token.Type.FUNCTION);
+            Eat(Token.Type.L_PARENTHESIS);
+
+            if (name == "Find") return FindFunction(scope);
+
+            if (name == "HandOfPlayer" || name == "FieldOfPlayer" ||
+                name == "DeckOfPlayer" || name == "GraveyardOfPlayer")
+                return GetPlayerFunction(name, scope);
+
+            if (name == "Pop" || name == "Shuffle") return NoParametersFunction(name);
+
+            if (name == "Push" || name == "Remove" || name == "Add" || name == "SendBottom") 
+                return CardParameterFunction(name, scope);
+
+            return new Function("NULL_FUNCTION");
+        }
+        catch
+        {
+            CrashLog(668);
+            throw;
+        }
+    }
+
+    public ForLoop ForLoopStatement(Scope scope)
     {
         try
         {
             Eat(Token.Type.FOR);
-            Var target = Variable();
+            
+            Var target = Variable(scope);
+            target.type = ASTType.Type.CARD;
+            if (scope.IsInScope(target) || target.GetType() == typeof(VarComp)) ErrorUnvalidAssignment(target);
+            else scope.Set(target,target.type);
+            
             Eat(Token.Type.IN);
-            Var targets = Variable();
-            Compound body = CompoundStatement();
+            
+            Var targets = Variable(scope);
+            if (!scope.IsInScope(targets) || targets.type != ASTType.Type.FIELD) ErrorUnvalidAssignment(targets);
+
+            Compound body = CompoundStatement(scope);
 
             ForLoop node = new ForLoop(target, targets, body);
             return node;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(696);
             throw;
         }
     }
 
-    public WhileLoop WhileLoopStatement()
+    public WhileLoop WhileLoopStatement(Scope scope)
     {
         try
         {
             Eat(Token.Type.WHILE);
             Eat(Token.Type.L_PARENTHESIS);
-            AST condition = BooleanExpression();
+            AST condition = BooleanExpression(scope);
             Eat(Token.Type.R_PARENTHESIS);
-            Compound body = CompoundStatement();
+            Compound body = CompoundStatement(scope);
             WhileLoop node = new WhileLoop(condition, body);
             return node;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(715);
             throw;
         }
     }
 
-    public IfNode IfNodeStatement()
+    public IfNode IfNodeStatement(Scope scope)
     {
         try
         {
             Eat(Token.Type.IF);
             Eat(Token.Type.L_PARENTHESIS);
-            AST condition = BooleanExpression();
+            AST condition = BooleanExpression(scope);
             Eat(Token.Type.R_PARENTHESIS);
-            Compound body = CompoundStatement();
+            Compound body = CompoundStatement(scope);
             IfNode node = new IfNode(condition, body);
             return node;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(734);
             throw;
         }
     }
 
-    public void ErrorInvalidIDStatement()
+    public void ErrorInvalidStatement()
     {
         Error("Only assignment, call, increment, decrement, await, and new object expressions can be used as a statement");
     }
 
-    public AST Statement() 
+    public AST Statement(Scope scope)
     {
         try
         {
@@ -580,28 +757,29 @@ public class Parser
 
             if (currentToken.type == Token.Type.WHILE)
             {
-                return WhileLoopStatement();
+                return WhileLoopStatement(scope);
             }
 
             if (currentToken.type == Token.Type.IF)
             {
-                return IfNodeStatement();
+                return IfNodeStatement(scope);
             }
 
             if (currentToken.type == Token.Type.FOR)
             {
-                return ForLoopStatement();
+                return ForLoopStatement(scope);
             }
 
             if (currentToken.type == Token.Type.FUNCTION)
             {
-                Function node = FunctionStatement(currentToken.value);
+                Function node = FunctionStatement(currentToken.value, scope);
+                if (node.type != ASTType.Type.VOID) ErrorInvalidStatement();
                 return node;
             }
 
             if (currentToken.type == Token.Type.ID)
             {
-                Var variable = Variable();
+                Var variable = Variable(scope);
                 if (variable.GetType() == typeof(VarComp) && currentToken.type == Token.Type.SEMI)
                 {
                     VarComp v = variable as VarComp;
@@ -609,36 +787,21 @@ public class Parser
                     if (v.args[count].GetType() == typeof(Function))
                     {
                         Function f = v.args[count] as Function;
-                        if (f.type != Var.Type.VOID) ErrorInvalidIDStatement();
+                        if (f.type != ASTType.Type.VOID) ErrorInvalidStatement();
                     }
-                    else ErrorInvalidIDStatement();
+                    else ErrorInvalidStatement();
 
                     return variable;
                 }
                 else if (currentToken.type == Token.Type.ASSIGN)
                 {
-                    Assign node = AssignmentStatement(variable);
-                    if (variable.GetType() == typeof(Var))
-                    {
-                        if (!IsInScope(variable))
-                        {
-                            variable.type = node.right.type;
-                            GLOBAL_SCOPE[variable.value] = variable.type;
-                        }
-                        else if (variable.type != node.right.type) ErrorInAssignment(node);
-                    }
-                    else
-                    {
-                        if (!IsInScope(variable)) ErrorHasNotBeenDeclared(variable);
-                        else if (variable.type != node.right.type) ErrorInAssignment(node); 
-                    }
-                    
+                    Assign node = AssignmentStatement(variable, scope);
                     return node;
                 }
                 else if (currentToken.type == Token.Type.MINUSMINUS || currentToken.type == Token.Type.PLUSPLUS)
                 {
                     UnaryOp node = new UnaryOp(currentToken, variable);
-                    if (variable.type != ASTType.Type.INT) ErrorInUnaryOp(node); 
+                    if (variable.type != ASTType.Type.INT) ErrorInUnaryOp(node);
                     Eat(currentToken.type);
                     return node;
                 }
@@ -651,13 +814,14 @@ public class Parser
             Eat(currentToken.type);
             return new NoOp();
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(814);
             throw;
         }
     }
 
-    public List<AST> StatementList()
+    public List<AST> StatementList(Scope scope)
     {
         try
         {
@@ -665,25 +829,28 @@ public class Parser
 
             while (currentToken.type != Token.Type.R_BRACKET && currentToken.type != Token.Type.EOF)
             {
-                AST node = Statement();
+                AST node = Statement(scope);
                 results.Add(node);
                 Eat(Token.Type.SEMI);
             }
 
             return results;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(836);
             throw;
         }
     }
 
-    public Compound CompoundStatement()
+    public Compound CompoundStatement(Scope outScope)
     {
         try
         {
+            Scope scope = new Scope(outScope);
+
             Eat(Token.Type.L_BRACKET);
-            List<AST> nodes = StatementList();
+            List<AST> nodes = StatementList(scope);
             Eat(Token.Type.R_BRACKET);
 
             Compound root = new Compound();
@@ -694,8 +861,9 @@ public class Parser
 
             return root;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(861);
             throw;
         }
     }
@@ -710,8 +878,9 @@ public class Parser
             Eat(Token.Type.STRING);
             return node;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(878);
             throw;
         }
     }
@@ -726,8 +895,9 @@ public class Parser
             Eat(Token.Type.STRING);
             return node;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(895);
             throw;
         }
     }
@@ -742,8 +912,9 @@ public class Parser
             Eat(Token.Type.INT);
             return node;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(912);
             throw;
         }
     }
@@ -760,10 +931,22 @@ public class Parser
             Eat(Token.Type.R_SQ_BRACKET);
             return node;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(931);
             throw;
         }
+    }
+
+    public void ErrorEffectCalling(Name name)
+    {
+        Error($"Effect '{name.name}' has not been declared");
+    }
+
+    public void ErrorEffectCalling(ASTType.Type type, Name name)
+    {
+        Var aux = new Var(new Token(Token.Type.ID, name.name), type);
+        ErrorUnvalidAssignment(aux);
     }
 
     public EffectOnActivation EffectOnActivationParse()
@@ -784,17 +967,48 @@ public class Parser
                     if (name == null)
                     {
                         name = NameParse();
+                        if (!GLOBAL_SCOPE.IsInScope(name)) ErrorEffectCalling(name);
+                        else
+                        {
+                            if (GLOBAL_SCOPE.Get(name) != ASTType.Type.EFFECT)
+                                ErrorEffectCalling(GLOBAL_SCOPE.Get(name), name);
+                        }
+
                         if (currentToken.type != Token.Type.R_BRACKET) Eat(Token.Type.COMA);
                     }
                     else ErrorRepeat();
                 }
                 else if (currentToken.type == Token.Type.ID)
                 {
-                    Var variable = Variable();
+                    EffectNode effect;
+                    Var variable = Variable(GLOBAL_SCOPE);
+
+                    if (variable.GetType() == typeof(VarComp) || variable.type != ASTType.Type.NULL) 
+                        ErrorUnvalidAssignment(variable);
                     Token token = currentToken;
                     Eat(Token.Type.COLON);
-                    ASTType value = Expression();
+                    ASTType value = Expression(GLOBAL_SCOPE);
+                    variable.type = value.type;
                     Assign param = new Assign(variable, token, value);
+
+
+                    if (name == null) Error("'Name' of effect has not been declared");
+                    else if (!EFFECT_LIST.ContainsKey(name.name)) ErrorEffectCalling(name);
+                    else 
+                    {
+                        effect = EFFECT_LIST[name.name];
+                        if (effect.scope.IsInScope(variable))
+                        {
+                            ASTType.Type typeInEffect = effect.scope.Get(variable);
+                            if (typeInEffect != variable.type)
+                            {
+                                Error($"Invalid type of parameter: cannot convert {typeInEffect} to {variable.type}");
+                            }
+                        }
+                        else Error($"Param '{variable.value}' not found in effect '{name.name}'");
+                    }
+
+
                     parameters.Add(param);
                     if (currentToken.type != Token.Type.R_BRACKET) Eat(Token.Type.COMA);
                 }
@@ -811,10 +1025,18 @@ public class Parser
 
             return node;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(1024);
             throw;
         }
+    }
+
+    public bool IsValidSource(Token token)
+    {
+        string s = token.value;
+        return (s == "board" || s == "hand" || s == "deck" || s == "field" || s == "parent" ||
+            s == "otherBoard" || s == "otherHand" || s == "otherDeck" || s == "otherField");
     }
 
     public Source SourceParse()
@@ -827,11 +1049,15 @@ public class Parser
             Token token = currentToken;
             Eat(Token.Type.STRING);
 
+            if (!IsValidSource(token))
+                Error($"'{token.value}' is not a valid source of context");
+
             Source node = new Source(token);
             return node;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(1054);
             throw;
         }
     }
@@ -848,8 +1074,9 @@ public class Parser
             Single node = new Single(token);
             return node;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(1073);
             throw;
         }
     }
@@ -862,23 +1089,28 @@ public class Parser
             Eat(Token.Type.COLON);
 
             Eat(Token.Type.L_PARENTHESIS);
-            Var unit = Variable();
+            
+            Var unit = Variable(GLOBAL_SCOPE);
             unit.type = ASTType.Type.CARD;
-            if (IsInScope(unit) || unit.GetType() == typeof(VarComp)) ErrorUnvalidAssignment(unit);
+            if (unit.GetType() == typeof(VarComp)) ErrorUnvalidAssignment(unit);
+
             Eat(Token.Type.R_PARENTHESIS);
 
             Eat(Token.Type.ARROW);
 
             Eat(Token.Type.L_PARENTHESIS);
-            ASTType condition = BooleanExpression();
+            Scope scope = new Scope(GLOBAL_SCOPE);
+            scope.Set(unit, unit.type);
+            ASTType condition = BooleanExpression(scope);
             Eat(Token.Type.R_PARENTHESIS);
 
             Predicate node = new Predicate(unit, condition);
 
             return node;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(1107);
             throw;
         }
     }
@@ -936,8 +1168,9 @@ public class Parser
 
             return node;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(1167);
             throw;
         }
     }
@@ -986,8 +1219,9 @@ public class Parser
 
             return node;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(1218);
             throw;
         }
     }
@@ -1045,8 +1279,9 @@ public class Parser
 
             return node;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(1278);
             throw;
         }
     }
@@ -1070,8 +1305,9 @@ public class Parser
 
             return nodes;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(1304);
             throw;
         }
     }
@@ -1094,10 +1330,16 @@ public class Parser
 
             return node;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(1329);
             throw;
         }
+    }
+
+    public void ErrorAlReadyDefinesMember(string name)
+    {
+        Error($"Card Editor already defines a member '{name}'");
     }
 
     public CardNode CardCreation()
@@ -1121,6 +1363,8 @@ public class Parser
                     if (name == null)
                     {
                         name = NameParse();
+                        if (GLOBAL_SCOPE.IsInScope(name)) ErrorAlReadyDefinesMember(name.name);
+                        else GLOBAL_SCOPE.Set(name, ASTType.Type.CARD);
                         if (currentToken.type != Token.Type.R_BRACKET) Eat(Token.Type.COMA);
                     }
                     else ErrorRepeat();
@@ -1182,8 +1426,9 @@ public class Parser
 
             return node;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(1425);
             throw;
         }
     }
@@ -1200,13 +1445,14 @@ public class Parser
             return node;
 
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(1444);
             throw;
         }
     }
 
-    public Args GetParametersInParams()
+    public Args GetParametersInParams(Scope scope)
     {
         try
         {
@@ -1214,14 +1460,16 @@ public class Parser
 
             while (currentToken.type != Token.Type.R_BRACKET && currentToken.type != Token.Type.EOF)
             {
-                Var variable = Variable();
-                if (variable.GetType() == typeof(VarComp)) Error("Invalid declaration of param");
+                Var variable = Variable(scope);
+                if (scope.IsInScope(variable) || variable.GetType() == typeof(VarComp))
+                    Error("Invalid declaration of param");
                 Eat(Token.Type.COLON);
                 if (currentToken.type == Token.Type.D_INT ||
                     currentToken.type == Token.Type.D_STRING ||
                     currentToken.type == Token.Type.D_BOOL)
                 {
                     variable.TypeInParams(currentToken.type);
+                    scope.Set(variable, variable.type);
                     args.Add(variable);
                     Eat(currentToken.type);
                     if (currentToken.type != Token.Type.R_BRACKET)
@@ -1238,25 +1486,27 @@ public class Parser
             }
             return args;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(1485);
             throw;
         }
     }
 
-    public Args ParamsEffectParse()
+    public Args ParamsEffectParse(Scope scope)
     {
         try
         {
             Eat(Token.Type.PARAMS);
             Eat(Token.Type.COLON);
             Eat(Token.Type.L_BRACKET);
-            Args node = GetParametersInParams();
+            Args node = GetParametersInParams(scope);
             Eat(Token.Type.R_BRACKET);
             return node;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(1503);
             throw;
         }
     }
@@ -1266,7 +1516,7 @@ public class Parser
         Error($"Unvalid Assignment of '{variable.value}'");
     }
 
-    public Action ActionParse()
+    public Action ActionParse(Scope outScope)
     {
         try
         {
@@ -1275,27 +1525,31 @@ public class Parser
 
             Eat(Token.Type.L_PARENTHESIS);
 
-            Var targets = Variable();
+            Var targets = Variable(outScope);
             targets.type = ASTType.Type.FIELD;
-            if (IsInScope(targets) || targets.GetType() == typeof(VarComp)) ErrorUnvalidAssignment(targets);
+            if (outScope.IsInScope(targets) || targets.GetType() == typeof(VarComp))
+                ErrorUnvalidAssignment(targets);
+            else outScope.Set(targets, targets.type);
 
             Eat(Token.Type.COMA);
 
-            Var context = Variable();
+            Var context = Variable(outScope);
             context.type = ASTType.Type.CONTEXT;
-            if (IsInScope(context) || context.GetType() == typeof(VarComp)) ErrorUnvalidAssignment(context);
-            
+            if (outScope.IsInScope(context) || context.GetType() == typeof(VarComp))
+                ErrorUnvalidAssignment(context);
+            else outScope.Set(context, context.type);
 
             Eat(Token.Type.R_PARENTHESIS);
             Eat(Token.Type.ARROW);
 
-            Compound body = CompoundStatement();
+            Compound body = CompoundStatement(outScope);
 
             Action node = new Action(targets, context, body);
             return node;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(1546);
             throw;
         }
     }
@@ -1307,7 +1561,7 @@ public class Parser
             Eat(Token.Type.EFFECT);
             Eat(Token.Type.L_BRACKET);
 
-
+            Scope scope = new Scope(GLOBAL_SCOPE);
             Name name = null;
             Args parameters = null;
             Action action = null;
@@ -1319,6 +1573,8 @@ public class Parser
                     if (name == null)
                     {
                         name = NameParse();
+                        if (GLOBAL_SCOPE.IsInScope(name)) ErrorAlReadyDefinesMember(name.name);
+                        else GLOBAL_SCOPE.Set(name, ASTType.Type.EFFECT);
                         if (currentToken.type != Token.Type.R_BRACKET)
                             Eat(Token.Type.COMA);
                     }
@@ -1328,7 +1584,7 @@ public class Parser
                 {
                     if (parameters == null)
                     {
-                        parameters = ParamsEffectParse();
+                        parameters = ParamsEffectParse(scope);
                         if (currentToken.type != Token.Type.R_BRACKET)
                             Eat(Token.Type.COMA);
                     }
@@ -1338,7 +1594,7 @@ public class Parser
                 {
                     if (action == null)
                     {
-                        action = ActionParse();
+                        action = ActionParse(scope);
                         if (currentToken.type != Token.Type.R_BRACKET)
                             Eat(Token.Type.COMA);
                     }
@@ -1356,7 +1612,7 @@ public class Parser
             }
             else
             {
-                node = new EffectNode(name, parameters, action);
+                node = new EffectNode(name, parameters, action, scope);
             }
 
             if (name == null || action == null)
@@ -1364,10 +1620,13 @@ public class Parser
                 ErrorInNodeCreation(node);
             }
 
+            EFFECT_LIST[name.name] = node;
+
             return node;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(1623);
             throw;
         }
     }
@@ -1399,8 +1658,9 @@ public class Parser
 
             return listOfCardAndEffect;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(1657);
             throw;
         }
     }
@@ -1420,8 +1680,9 @@ public class Parser
 
             return program;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(1679);
             throw;
         }
     }
@@ -1440,8 +1701,9 @@ public class Parser
 
             return node;
         }
-        catch (System.Exception)
+        catch
         {
+            CrashLog(1700);
             AST node = new NoOp();
             return node;
         }

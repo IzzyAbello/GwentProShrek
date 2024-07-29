@@ -1,8 +1,17 @@
 effect
-        {
-            Name:"Draw",
-            Action: (caballo,linche) => 
-            {
-                context.Board[5 + 2] = a[5];
-            }
-        }
+{
+	Name: "ReturnToDeck",
+	Action: (targets, context) =>
+	{
+		for target in targets
+		{
+			owner = target.Owner;
+			deck = context.DeckOfPlayer(owner);
+			c = deck[5];
+			while (c > 0)
+			{
+				c.Power--;
+			};
+		};
+	}
+}

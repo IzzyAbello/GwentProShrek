@@ -33,7 +33,7 @@ public class BinOp : ASTType
     public ASTType left;
     public Token op;
     public ASTType right;
-    
+
     public BinOp(ASTType left, Token op, ASTType right)
     {
         this.left = left;
@@ -42,9 +42,9 @@ public class BinOp : ASTType
         GetTypeOperator();
     }
 
-    public void GetTypeOperator ()
+    public void GetTypeOperator()
     {
-        if (op.type == Token.Type.PLUS || op.type == Token.Type.MINUS 
+        if (op.type == Token.Type.PLUS || op.type == Token.Type.MINUS
             || op.type == Token.Type.MULT || op.type == Token.Type.DIVIDE
             || op.type == Token.Type.MOD) type = Type.INT;
 
@@ -137,7 +137,7 @@ public class Bool : ASTType
     public Token token;
     public bool value;
 
-    public Bool (Token token)
+    public Bool(Token token)
     {
         this.token = token;
         value = bool.Parse(token.value);
@@ -160,7 +160,7 @@ public class Name : AST
 {
     public string name;
 
-    public Name (Token token)
+    public Name(Token token)
     {
         name = token.value;
     }
@@ -222,7 +222,7 @@ public class TypeNode : AST
 {
     public string type;
 
-    public TypeNode (Token token)
+    public TypeNode(Token token)
     {
         type = token.value;
     }
@@ -309,9 +309,9 @@ public class OnActivation : AST
     {
         Debug.Log(height + "-OnActivation: ");
         if (onActivation != null) foreach (OnActivationElement element in onActivation)
-        {
-            element.Print(height + "\t");
-        }
+            {
+                element.Print(height + "\t");
+            }
     }
 }
 
@@ -414,7 +414,7 @@ public class Selector : AST
     public Single single;
     public Predicate predicate;
 
-    public Selector (Source source, Predicate predicate)
+    public Selector(Source source, Predicate predicate)
     {
         this.source = source;
         this.predicate = predicate;
@@ -441,7 +441,7 @@ public class Single : AST
 {
     public bool single;
 
-    public Single (Token token)
+    public Single(Token token)
     {
         if (token.type == Token.Type.BOOL)
         {
@@ -500,6 +500,7 @@ public class EffectNode : ASTType
     public Name name;
     public Args parameters;
     public Action action;
+    public Scope scope;
 
     public EffectNode(Name name, Action action)
     {
@@ -507,14 +508,16 @@ public class EffectNode : ASTType
         parameters = null;
         this.action = action;
         type = Type.EFFECT;
+        scope = new Scope();
     }
 
-    public EffectNode(Name name, Args parameters, Action action)
+    public EffectNode(Name name, Args parameters, Action action, Scope scope)
     {
         this.name = name;
         this.parameters = parameters;
         this.action = action;
         type = Type.EFFECT;
+        this.scope = scope;
     }
 
     public override void Print(string height)
@@ -567,7 +570,7 @@ public class Compound : AST
         Debug.Log(height + "Childrens: " + children.Count);
 
         if (children != null) foreach (AST child in children)
-            child.Print(height + '\t');
+                child.Print(height + '\t');
     }
 }
 
@@ -616,7 +619,7 @@ public class WhileLoop : AST
     public AST condition;
     public Compound body;
 
-    public WhileLoop (AST condition, Compound body)
+    public WhileLoop(AST condition, Compound body)
     {
         this.condition = condition;
         this.body = body;
@@ -642,18 +645,26 @@ public class Function : ASTType
         TypeToReturn();
     }
 
+    public Function(string functionName)
+    {
+        this.functionName = functionName;
+        TypeToReturn();
+    }
+
     public void TypeToReturn()
     {
         if (functionName == "FieldOfPlayer")
             type = Type.CONTEXT;
+        if (functionName == "Find")
+            type = Type.FIELD;
         if (functionName == "HandOfPlayer")
             type = Type.FIELD;
         if (functionName == "GraveyardOfPlayer")
             type = Type.FIELD;
         if (functionName == "DeckOfPlayer")
             type = Type.FIELD;
-        if (functionName == "Find")
-            type = Type.FIELD;
+        if (functionName == "Pop")
+            type = Type.CARD;
         if (functionName == "Push")
             type = Type.VOID;
         if (functionName == "SendBottom")
@@ -664,8 +675,6 @@ public class Function : ASTType
             type = Type.VOID;
         if (functionName == "Add")
             type = Type.VOID;
-        if (functionName == "Pop")
-            type = Type.CARD;
     }
 
     public override void Print(string height)
@@ -758,10 +767,13 @@ public class VarComp : Var
     {
         Debug.Log(height + "-VarCompound:");
         base.Print(height);
-        if (args != null) foreach (AST ast in args)
-        {
-            ast.Print(height + "\t");
-        }
+        string tab = "\t";
+        if (args != null) 
+            foreach (AST ast in args)
+            {
+                ast.Print(height + tab);
+                tab += "\t";
+            }
     }
 }
 
@@ -785,7 +797,7 @@ public class Indexer : ASTType
 {
     public ASTType index;
 
-    public Indexer (ASTType index)
+    public Indexer(ASTType index)
     {
         this.index = index;
         type = Type.INDEXER;
@@ -821,7 +833,7 @@ public class Args : AST
         Debug.Log(height + "-Arguments: ");
 
         if (args != null) foreach (AST child in args)
-            child.Print(height + '\t');
+                child.Print(height + '\t');
     }
 }
 

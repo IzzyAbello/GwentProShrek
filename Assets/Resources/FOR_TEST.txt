@@ -3,6 +3,95 @@
 
 effect
 {
+	Name:"Damage",
+	Params: 
+    	{
+		amount: Number
+	},		
+        Action: (targets,context) => 
+       	{
+		for target in targets
+		{
+			i = 0;
+			while (i++ < amount)
+			{
+				target.Power -= 1;
+			};
+		};
+        }
+}
+
+effect 
+{
+	Name: "Draw",
+	Action: (t, c) =>
+	{
+		topCard = c.Deck.Pop();
+		c.Hand.Add(topCard);
+		c.Hand.Shuffle();
+	}
+}
+
+
+effect
+{
+	Name: "ReturnToDeck",
+	Action: (tt, cc) =>
+	{
+		for tar in tt
+		{
+			owner = tar.Owner;
+			deck = cc.DeckOfPlayer(owner);
+			deck.Push(tar);
+			deck.Shuffle();
+			cc.Board.Remove(target);
+		};
+	}
+}
+
+card
+{
+	Type: "Oro",
+	Name: "Beluga",
+	Faction: "Shrek",
+	Power: 10,
+	Range: ["Melee"],
+	OnActivation:
+	[
+		{
+			Effect: {Name: "Damage", amount: 5},
+			Selector: 
+			{
+				Source: "Board",
+				Single: false,
+				Predicate: (unit) => (unit.Faction == "Lord" @@ "Faarquad")
+			},
+			PostAction:
+			{
+				Effect: {Name: "ReturnToDeck"},
+				Selector:
+				{
+					Source: "Parent",
+					Single: false,
+					Predicate: (unity) => (unity.Power < 1)
+				}
+			}
+		},
+		{
+			Effect: {Name: "Draw"},
+			Selector:
+			{
+				Source: "Board",
+				Predicate: (unidad) => (true)
+			}
+		}
+	]
+}
+
+///////////////////////////////       //////////////////////////////////
+
+effect
+{
 	Name: "Damage",
 	Params: {Amount: Number},
 	Action: (t, c) =>

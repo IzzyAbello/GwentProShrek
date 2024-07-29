@@ -2,121 +2,97 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Semantic
+public class Scope
 {
-    public string name;
-    public ASTType.Type type;
-    public List<Semantic> fields;
-}
+    public Dictionary<string, ASTType.Type> LOCAL_SCOPE;
+    public Scope GLOBAL_SCOPE;
 
-public class StringSemantic : Semantic
-{
-    public StringSemantic(string name)
+    public Scope()
     {
-        this.name = name;
-        type = ASTType.Type.STRING;
+        GLOBAL_SCOPE = null;
+        LOCAL_SCOPE = new Dictionary<string, ASTType.Type>();
     }
-}
-
-public class IntSemantic : Semantic
-{
-    public IntSemantic(string name)
+    public Scope(Scope GLOBAL_SCOPE)
     {
-        this.name = name;
-        type = ASTType.Type.INT;
+        this.GLOBAL_SCOPE = GLOBAL_SCOPE;
+        LOCAL_SCOPE = new Dictionary<string, ASTType.Type>();
     }
-}
 
-public class BoolSemantic : Semantic
-{
-    public BoolSemantic(string name)
+
+    public bool IsInScope(string name)
     {
-        this.name = name;
-        type = ASTType.Type.BOOL;
+        if (GLOBAL_SCOPE == null) return LOCAL_SCOPE.ContainsKey(name);
+        else if (LOCAL_SCOPE.ContainsKey(name)) return true;
+        else return GLOBAL_SCOPE.IsInScope(name);
     }
-}
-
-public class EffectSemantic : Semantic
-{
-    public EffectSemantic(string name)
+    public bool IsInScope(Name name)
     {
-        this.name = name;
-        type = ASTType.Type.EFFECT;
-        fields = new List<Semantic>();
-        fields.Add(new StringSemantic("Name"));
+        return IsInScope(name.name);
     }
-}
-
-public class CardSemantic : Semantic
-{
-    public CardSemantic(string name)
+    public bool IsInScope(Var variable)
     {
-        this.name = name;
-        type = ASTType.Type.CARD;
-        fields = new List<Semantic>();
-        fields.Add(new StringSemantic("Type"));
-        fields.Add(new StringSemantic("Name"));
-        fields.Add(new StringSemantic("Faction"));
-        fields.Add(new StringSemantic("Range"));
-        fields.Add(new IntSemantic("Power"));
+        return IsInScope(variable.value);
     }
-}
-
-public class IndexerSemantic : Semantic
-{
-    public IndexerSemantic(string name)
+    public bool IsInScope(EffectNode effect)
     {
-        this.name = name + "->Indexer";
-        type = ASTType.Type.INDEXER;
+        return IsInScope(effect.name.name);
     }
-}
-
-public class FieldSemantic : Semantic
-{
-    public FieldSemantic(string name)
+    public bool IsInScope(CardNode card)
     {
-        this.name = name;
-        type = ASTType.Type.FIELD;
-        fields = new List<Semantic>();
-        fields.Add(new IndexerSemantic(name));
+        return IsInScope(card.name.name);
     }
-}
 
-public class TriggerPlayerSemantic : Semantic
-{
-    public TriggerPlayerSemantic(string name)
+
+    public ASTType.Type Get(string name)
     {
-        this.name = name;
-        type = ASTType.Type.CONTEXT;
-        fields = new List<Semantic>();
-        fields.Add(new ContextSemanticTP("ContextOf->" + name));
+        if (GLOBAL_SCOPE == null)
+        {
+            if (LOCAL_SCOPE.ContainsKey(name)) return LOCAL_SCOPE[name];
+            else return ASTType.Type.NULL;
+        }
+        else if (LOCAL_SCOPE.ContainsKey(name)) return LOCAL_SCOPE[name];
+        else return GLOBAL_SCOPE.Get(name);
     }
-}
-
-public class ContextSemantic : Semantic
-{
-    public ContextSemantic(string name)
+    public ASTType.Type Get(Name name)
     {
-        this.name = name;
-        type = ASTType.Type.CONTEXT;
-        fields = new List<Semantic>();
-        fields.Add(new TriggerPlayerSemantic("TriggerPlayer"));
-        fields.Add(new TriggerPlayerSemantic("OppositePlayer"));
+        return Get(name.name);
     }
-}
-
-public class ContextSemanticTP : Semantic
-{
-    public ContextSemanticTP(string name)
+    public ASTType.Type Get(Var variable)
     {
-        this.name = name;
-        type = ASTType.Type.CONTEXT;
-        fields = new List<Semantic>();
-        fields.Add(new FieldSemantic("Hand"));
-        fields.Add(new FieldSemantic("Graveyard"));
-        fields.Add(new FieldSemantic("Deck"));
-        fields.Add(new FieldSemantic("Melee"));
-        fields.Add(new FieldSemantic("Range"));
-        fields.Add(new FieldSemantic("Siege"));
+        return Get(variable.value);
+    }
+    public ASTType.Type Get(EffectNode effect)
+    {
+        return Get(effect.name.name);
+    }
+    public ASTType.Type Get(CardNode card)
+    {
+        return Get(card.name.name);
+    }
+
+
+    public void Set(string name, ASTType.Type type) // SEE THIS
+    {
+        if (!IsInScope(name)) LOCAL_SCOPE[name] = type;
+        else if (Get(name) != type)
+        {
+            Debug.Log($"ERROR IN ASSIGMENT CANOT CONVERT '{Get(name)}' to '{type}'");
+        }
+    }
+    public void Set(Name name, ASTType.Type type)
+    {
+        Set(name.name, type);
+    }
+    public void Set(Var variable, ASTType.Type type)
+    {
+        Set(variable.value, type);
+    }
+    public void Set(EffectNode effect, ASTType.Type type)
+    {
+        Set(effect.name.name, type);
+    }
+    public void Set(CardNode card, ASTType.Type type)
+    {
+        Set(card.name.name, type);
     }
 }

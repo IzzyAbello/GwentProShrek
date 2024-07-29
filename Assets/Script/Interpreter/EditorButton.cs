@@ -51,6 +51,14 @@ public class EditorButton : MonoBehaviour
         //lexer.ReadAllText();
 
         parser.Parse();
+
+
+        /*Scope global = new Scope();
+        Scope inner = new Scope(global);
+
+        global.Set("pinga", ASTType.Type.CARD);
+
+        Debug.Log(inner.IsInScope("pinga"));*/
     }
 
     public void OnClickGoToEditor()
