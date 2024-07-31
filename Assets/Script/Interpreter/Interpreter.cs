@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class Interpreter
 {
-    public Parser parser;
-    public Dictionary<string, int> GLOBAL_SCOPE;
+    public AST tree;
+    public Scope<MultiScope> GLOBAL_SCOPE;
 
     public Interpreter(Parser parser)
     {
-        this.parser = parser;
-        GLOBAL_SCOPE = new Dictionary<string, int>();
+        tree = parser.Parse();
+        GLOBAL_SCOPE = new Scope<MultiScope>();
     }
 
 

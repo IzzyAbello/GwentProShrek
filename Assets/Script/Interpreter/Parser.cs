@@ -7,7 +7,7 @@ public class Parser
     public Lexer lexer;
     public Token currentToken;
     public string curError;
-    public Scope GLOBAL_SCOPE;
+    public Scope <ASTType.Type> GLOBAL_SCOPE;
     public Dictionary<string, EffectNode> EFFECT_LIST;
 
     public Parser(Lexer lexer)
@@ -15,7 +15,7 @@ public class Parser
         this.lexer = lexer;
         currentToken = lexer.GetNextToken();
         curError = "";
-        GLOBAL_SCOPE = new Scope();
+        GLOBAL_SCOPE = new Scope<ASTType.Type>();
         EFFECT_LIST = new Dictionary<string, EffectNode>();
     }
 
@@ -121,7 +121,7 @@ public class Parser
         return false;
     }
 
-    public ASTType Factor(Scope scope)
+    public ASTType Factor(Scope<ASTType.Type> scope)
     {
         try
         {
@@ -190,7 +190,7 @@ public class Parser
         }
     }
 
-    public ASTType Term(Scope scope)
+    public ASTType Term(Scope<ASTType.Type> scope)
     {
         try
         {
@@ -211,7 +211,7 @@ public class Parser
         }
     }
 
-    public ASTType Expression(Scope scope)
+    public ASTType Expression(Scope<ASTType.Type> scope)
     {
         try
         {
@@ -233,7 +233,7 @@ public class Parser
         }
     }
 
-    public ASTType BooleanFactor(Scope scope)
+    public ASTType BooleanFactor(Scope<ASTType.Type> scope)
     {
         try
         {
@@ -281,7 +281,7 @@ public class Parser
         }
     }
 
-    public ASTType BooleanTerm(Scope scope)
+    public ASTType BooleanTerm(Scope<ASTType.Type> scope)
     {
         try
         {
@@ -303,7 +303,7 @@ public class Parser
         }
     }
 
-    public ASTType BooleanExpression(Scope scope)
+    public ASTType BooleanExpression(Scope<ASTType.Type> scope)
     {
         try
         {
@@ -330,7 +330,7 @@ public class Parser
         return node.index.type == ASTType.Type.INT;
     }
 
-    public Indexer IndexerParse(Scope scope)
+    public Indexer IndexerParse(Scope<ASTType.Type> scope)
     {
         try
         {
@@ -348,7 +348,7 @@ public class Parser
         }
     }
 
-    public Var Variable(Scope scope)
+    public Var Variable(Scope<ASTType.Type> scope)
     {
         try
         {
@@ -380,11 +380,12 @@ public class Parser
                         Token token = currentToken;
                         if (token.type == Token.Type.TYPE || token.type == Token.Type.NAME ||
                             token.type == Token.Type.FACTION || token.type == Token.Type.POWER ||
-                            token.type == Token.Type.RANGE)
+                            token.type == Token.Type.RANGE || token.type == Token.Type.OWNER)
                         {
                             Eat(token.type);
                             Var v = new Var(token, ASTType.Type.STRING);
                             if (token.type == Token.Type.POWER) v.type = ASTType.Type.INT;
+                            if (token.type == Token.Type.OWNER) v.type = ASTType.Type.FIELD;
                             nd.args.Add(v);
                         }
                         else if (token.type == Token.Type.POINTER)
@@ -432,7 +433,7 @@ public class Parser
         }
     }
 
-    public bool IsPossibleVarComp(VarComp v, Scope scope)
+    public bool IsPossibleVarComp(VarComp v, Scope<ASTType.Type> scope)
     {
         for (int i = 0; i < v.args.Count; i++)
         {
@@ -495,12 +496,21 @@ public class Parser
             return (s == "Name");
         }
 
-        Error($"Invalid VarComp construction: '{v.ToString()}' is not a valid field of type '{fatherType.ToString()}'");
-
+        ErrorInVarCompConstruction(fatherType, v);
         return false;
     }
 
-    public Assign AssignmentStatement(Var variable, Scope scope)
+    public void ErrorInVarCompConstruction(ASTType.Type fatherType, ASTType v)
+    {
+        if (v.GetType() == typeof(Var))
+        {
+            Var vv = v as Var;
+            Error($"Invalid VarComp construction: '{vv.value}' is not a valid field of type '{fatherType.ToString()}'");
+        }
+        else Error($"Invalid VarComp construction: '{v.ToString()}' is not a valid field of type '{fatherType.ToString()}'");
+    }
+
+    public Assign AssignmentStatement(Var variable, Scope<ASTType.Type> scope)
     {
         try
         {
@@ -552,11 +562,11 @@ public class Parser
         Error($"Invalid parameter for Function '{functionName}'");
     }
 
-    public Function FindFunction(Scope outScope)
+    public Function FindFunction(Scope<ASTType.Type> outScope)
     {
         try
         {
-            Scope scope = new Scope(outScope);
+            Scope<ASTType.Type> scope = new Scope<ASTType.Type>(outScope);
 
             Eat(Token.Type.L_PARENTHESIS);
 
@@ -593,7 +603,7 @@ public class Parser
         }
     }
 
-    public Function GetPlayerFunction (string name, Scope scope)
+    public Function GetPlayerFunction (string name, Scope<ASTType.Type> scope)
     {
         try
         {
@@ -628,7 +638,7 @@ public class Parser
         }
     }
 
-    public Function CardParameterFunction (string name, Scope scope)
+    public Function CardParameterFunction (string name, Scope<ASTType.Type> scope)
     {
         try
         {
@@ -648,7 +658,7 @@ public class Parser
         }
     }
 
-    public Function FunctionStatement(string name, Scope scope)
+    public Function FunctionStatement(string name, Scope<ASTType.Type> scope)
     {
         try
         {
@@ -675,7 +685,7 @@ public class Parser
         }
     }
 
-    public ForLoop ForLoopStatement(Scope scope)
+    public ForLoop ForLoopStatement(Scope<ASTType.Type> scope)
     {
         try
         {
@@ -703,7 +713,7 @@ public class Parser
         }
     }
 
-    public WhileLoop WhileLoopStatement(Scope scope)
+    public WhileLoop WhileLoopStatement(Scope<ASTType.Type> scope)
     {
         try
         {
@@ -722,7 +732,7 @@ public class Parser
         }
     }
 
-    public IfNode IfNodeStatement(Scope scope)
+    public IfNode IfNodeStatement(Scope<ASTType.Type> scope)
     {
         try
         {
@@ -746,7 +756,7 @@ public class Parser
         Error("Only assignment, call, increment, decrement, await, and new object expressions can be used as a statement");
     }
 
-    public AST Statement(Scope scope)
+    public AST Statement(Scope<ASTType.Type> scope)
     {
         try
         {
@@ -821,7 +831,7 @@ public class Parser
         }
     }
 
-    public List<AST> StatementList(Scope scope)
+    public List<AST> StatementList(Scope<ASTType.Type> scope)
     {
         try
         {
@@ -843,11 +853,11 @@ public class Parser
         }
     }
 
-    public Compound CompoundStatement(Scope outScope)
+    public Compound CompoundStatement(Scope<ASTType.Type> outScope)
     {
         try
         {
-            Scope scope = new Scope(outScope);
+            Scope<ASTType.Type> scope = new Scope<ASTType.Type>(outScope);
 
             Eat(Token.Type.L_BRACKET);
             List<AST> nodes = StatementList(scope);
@@ -1099,7 +1109,7 @@ public class Parser
             Eat(Token.Type.ARROW);
 
             Eat(Token.Type.L_PARENTHESIS);
-            Scope scope = new Scope(GLOBAL_SCOPE);
+            Scope<ASTType.Type> scope = new Scope<ASTType.Type>(GLOBAL_SCOPE);
             scope.Set(unit, unit.type);
             ASTType condition = BooleanExpression(scope);
             Eat(Token.Type.R_PARENTHESIS);
@@ -1452,7 +1462,7 @@ public class Parser
         }
     }
 
-    public Args GetParametersInParams(Scope scope)
+    public Args GetParametersInParams(Scope<ASTType.Type> scope)
     {
         try
         {
@@ -1493,7 +1503,7 @@ public class Parser
         }
     }
 
-    public Args ParamsEffectParse(Scope scope)
+    public Args ParamsEffectParse(Scope<ASTType.Type> scope)
     {
         try
         {
@@ -1516,7 +1526,7 @@ public class Parser
         Error($"Unvalid Assignment of '{variable.value}'");
     }
 
-    public Action ActionParse(Scope outScope)
+    public Action ActionParse(Scope<ASTType.Type> outScope)
     {
         try
         {
@@ -1561,7 +1571,7 @@ public class Parser
             Eat(Token.Type.EFFECT);
             Eat(Token.Type.L_BRACKET);
 
-            Scope scope = new Scope(GLOBAL_SCOPE);
+            Scope<ASTType.Type> scope = new Scope<ASTType.Type>(GLOBAL_SCOPE);
             Name name = null;
             Args parameters = null;
             Action action = null;

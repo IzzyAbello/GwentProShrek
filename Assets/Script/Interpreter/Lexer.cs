@@ -55,7 +55,6 @@ public class Lexer
         reservedKeywords["Field"] = new Token(Token.Type.POINTER, "Field");
         reservedKeywords["Graveyard"] = new Token(Token.Type.POINTER, "Graveyard");
         reservedKeywords["Deck"] = new Token(Token.Type.POINTER, "Deck");
-        reservedKeywords["Owner"] = new Token(Token.Type.POINTER, "Owner");
         reservedKeywords["Board"] = new Token(Token.Type.POINTER, "Board");
 
         reservedKeywords["Find"] = new Token(Token.Type.FUNCTION, "Find");
@@ -70,8 +69,8 @@ public class Lexer
         reservedKeywords["Shuffle"] = new Token(Token.Type.FUNCTION, "Shuffle");
         reservedKeywords["Add"] = new Token(Token.Type.FUNCTION, "Add");
 
-        reservedKeywords["card"] = new Token(Token.Type.CARD, "Card");
-
+        reservedKeywords["card"] = new Token(Token.Type.CARD, "card");
+        reservedKeywords["Owner"] = new Token(Token.Type.OWNER, "Owner");
         reservedKeywords["Type"] = new Token(Token.Type.TYPE, "Type");
         reservedKeywords["Faction"] = new Token(Token.Type.FACTION, "Faction");
         reservedKeywords["Power"] = new Token(Token.Type.POWER, "Power");

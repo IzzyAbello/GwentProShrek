@@ -18,7 +18,7 @@ public abstract class ASTType : AST
 {
     public enum Type
     {
-        CONTEXT, CARD, FIELD, INT, STRING, BOOL, VOID, EFFECT, INDEXER, NULL
+        NULL, CONTEXT, CARD, FIELD, INT, STRING, BOOL, VOID, EFFECT, INDEXER 
     }
     public Type type = Type.NULL;
 }
@@ -500,7 +500,7 @@ public class EffectNode : ASTType
     public Name name;
     public Args parameters;
     public Action action;
-    public Scope scope;
+    public Scope<ASTType.Type> scope;
 
     public EffectNode(Name name, Action action)
     {
@@ -508,10 +508,10 @@ public class EffectNode : ASTType
         parameters = null;
         this.action = action;
         type = Type.EFFECT;
-        scope = new Scope();
+        scope = new Scope<ASTType.Type>();
     }
 
-    public EffectNode(Name name, Args parameters, Action action, Scope scope)
+    public EffectNode(Name name, Args parameters, Action action, Scope<ASTType.Type> scope)
     {
         this.name = name;
         this.parameters = parameters;
