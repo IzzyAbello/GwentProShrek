@@ -15,7 +15,7 @@ public class SwitchTurn : MonoBehaviour
 
     public TextMeshProUGUI toRoundImage;
 
-    Vector2 playPositionHand;
+    public Vector2 playPositionHand;
     Vector2 outSidePositionHand;
 
     Vector2 playPositionLeader;

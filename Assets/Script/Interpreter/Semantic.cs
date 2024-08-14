@@ -2,17 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Scope <T>
+public class Scope<T>
 {
     public Dictionary<string, T> LOCAL_SCOPE;
-    public Scope <T> GLOBAL_SCOPE;
+    public Scope<T> GLOBAL_SCOPE;
 
     public Scope()
     {
         GLOBAL_SCOPE = null;
         LOCAL_SCOPE = new Dictionary<string, T>();
     }
-    public Scope(Scope <T> GLOBAL_SCOPE)
+    public Scope(Scope<T> GLOBAL_SCOPE)
     {
         this.GLOBAL_SCOPE = GLOBAL_SCOPE;
         LOCAL_SCOPE = new Dictionary<string, T>();
@@ -75,104 +75,419 @@ public class Scope <T>
     }
 
 
-    public void Set(string name, T type)
+    public void Set(string name, T value)
     {
-        if (!IsInScope(name)) LOCAL_SCOPE[name] = type;
-        else if (!Equals(Get(name), type))
-        {
-            Debug.Log($"ERROR IN ASSIGMENT CANOT CONVERT '{Get(name)}' to '{type}'");
-        }
-    } // SEE THIS
-    public void Set(Name name, T type)
-    {
-        Set(name.name, type);
+        if (!IsInScope(name) || LOCAL_SCOPE.ContainsKey(name)) LOCAL_SCOPE[name] = value;
+        else GLOBAL_SCOPE.Set(name, value);
     }
-    public void Set(Var variable, T type)
+    public void Set(Name name, T value)
     {
-        Set(variable.value, type);
+        Set(name.name, value);
     }
-    public void Set(EffectNode effect, T type)
+    public void Set(Var variable, T value)
     {
-        Set(effect.name.name, type);
+        Set(variable.value, value);
     }
-    public void Set(CardNode card, T type)
+    public void Set(EffectNode effect, T value)
     {
-        Set(card.name.name, type);
+        Set(effect.name.name, value);
+    }
+    public void Set(CardNode card, T value)
+    {
+        Set(card.name.name, value);
     }
 }
 
-public class FieldStruct // Create all methods for this shit...
+public abstract class InterpreterStruct
 {
-    List<GameObject> cardList;
+    public RefToBoard refToBoard;
+    public abstract object Acces(object key);
+
+    public abstract object SetAcces(object key, object value, bool isLast = false);
+}
+
+public class CardStruct : InterpreterStruct
+{
+    public GameObject card;
+
+    public override object Acces(object key)
+    {
+        string k = key as string;
+        DisplayCard dp = card.GetComponent<DisplayCard>();
+
+        if (k == "Power") return dp.cardPower;
+        if (k == "Name") return dp.cardName;
+        if (k == "Type") return (dp.cardKind == 'g') ? "Gold" : "Silver";
+        if (k == "Range")
+        {
+            char zone = dp.cardZone;
+            if (zone == 'M') return "Melee";
+            if (zone == 'R') return "Ranged";
+            if (zone == 'S') return "Siege";
+            if (zone == 'P') return "PowerUp";
+            return 'C';
+        }
+        if (k == "Faction") return (dp.cardFaction == 0) ? "Shrek" : "Lord Farquaad";
+        if (k == "Owner") return (dp.cardFaction == 0) ? refToBoard.shrekFaction : refToBoard.badFaction;
+        return default;
+    }
+
+    public override object SetAcces(object key, object value, bool isLast = false)
+    {
+        string k = key as string;
+        DisplayCard dp = card.GetComponent<DisplayCard>();
+
+        if (isLast)
+        {
+            if (k == "Power")
+            {
+                dp.SetPower((int)value);
+            }
+            if (k == "Name")
+            {
+                dp.displayCard.cardName = value as string;
+                dp.GetStated();
+            }
+            if (k == "Type")
+            {
+                if (value as string == "Oro") dp.cardKind = 'g';
+                if (value as string == "Plata") dp.cardKind = 's';
+                dp.SetImages();
+            }
+            if (k == "Range")
+            {
+                if (value as string == "Melee") dp.cardZone = 'M';
+                if (value as string == "Ranged") dp.cardZone = 'R';
+                if (value as string == "Siege") dp.cardZone = 'S';
+                if (value as string == "Climate") dp.cardZone = 'C';
+                if (value as string == "PowerUp") dp.cardZone = 'P';
+                dp.SetImages();
+            }
+            if (k == "Faction")
+            {
+                if (value as string == "Shrek") dp.cardFaction = 0;
+                if (value as string == "Lord Farquaad") dp.cardFaction = 1;
+                dp.SetImages();
+            }
+        }
+        if (k == "Owner")
+            return (dp.cardFaction == 0) ? refToBoard.shrekFaction : refToBoard.badFaction;
+
+        return default;
+    }
+
+    public CardStruct(GameObject card)
+    {
+        this.card = card;
+        refToBoard = GameObject.Find("ReferenceToTheBoard").GetComponent<RefToBoard>();
+    }
+}
+
+public class FieldStruct : InterpreterStruct
+{
+    public List<CardStruct> cardList;
+
+    public override object Acces(object key)
+    {
+        int index = (int)key;
+        return cardList[index];
+    }
+
+    public override object SetAcces(object key, object value, bool isLast = false)
+    {
+        int index = (int)key;
+
+        if (isLast)
+        {
+            cardList[index] = value as CardStruct;
+        }
+
+        return cardList[index];
+    }
+
+    public bool Contains(CardStruct card)
+    {
+        return cardList.Contains(card);
+    }
 
     public FieldStruct()
     {
-        cardList = new List<GameObject>();
+        refToBoard = GameObject.Find("ReferenceToTheBoard").GetComponent<RefToBoard>();
+        cardList = new List<CardStruct>();
+    }
+    public FieldStruct(GameObject cardZone)
+    {
+        cardList = new List<CardStruct>();
+        refToBoard = GameObject.Find("ReferenceToTheBoard").GetComponent<RefToBoard>();
+        string name = cardZone.name;
+
+        if (name == "GraveYardShrek" || name == "GraveYardBad")
+        {
+            GetDisplay(cardZone.GetComponent<Graveyard>().cardsGraveyard);
+        }
+        else if (name == "PlayerDeck" || name == "PlayerDeckBad")
+        {
+            GetDisplay(cardZone.GetComponent<Deck>().deck);
+        }
+        else foreach (Transform card in cardZone.transform)
+            {
+                cardList.Add(new CardStruct(card.gameObject));
+            }
     }
 
-    public void Add(GameObject card)
+    void GetDisplay(List<GameObject> list)
+    {
+        foreach (GameObject card in list)
+        {
+            card.GetComponent<DisplayCard>().GetStated();
+
+            cardList.Add(new CardStruct(card));
+        }
+    }
+
+    public FieldStruct(List<CardStruct> cardList)
+    {
+        refToBoard = GameObject.Find("ReferenceToTheBoard").GetComponent<RefToBoard>();
+        this.cardList = cardList;
+    }
+
+    public void Add(CardStruct card)
     {
         cardList.Add(card);
     }
+
+    public void Shuffle() // See this crap...
+    {
+        for (int i = 0; i < cardList.Count; i++)
+        {
+            CardStruct temp = cardList[i];
+            int randomIndex = Random.Range(0, cardList.Count);
+            cardList[i] = cardList[randomIndex];
+            cardList[randomIndex] = temp;
+        }
+    }
+
+    public void Remove(CardStruct card)
+    {
+        int index = -1;
+        for (int i = 0; i < cardList.Count; i++)
+        {
+            if (cardList[i] == card)
+            {
+                index = i;
+                break;
+            }
+        }
+
+        if (index != -1) cardList.RemoveAt(index);
+    }
+
+    public CardStruct Pop()
+    {
+        CardStruct toReturn = cardList[0];
+        cardList.RemoveAt(0);
+        return toReturn;
+    }
+
+    public void SendBottom(CardStruct card)
+    {
+        Remove(card);
+        Add(card);
+    }
+
+    public void Push(CardStruct card)
+    {
+        cardList.Insert(0, card);
+    }
+
+    public void Join(FieldStruct fieldToJoin)
+    {
+        foreach (CardStruct card in fieldToJoin.cardList)
+        {
+            cardList.Add(card);
+        }
+    }
 }
 
-public class ContextStruct // And this...
+public class ContextStruct : InterpreterStruct
 {
-    List<FieldStruct> fieldList;
+    public List<FieldStruct> fieldList;
+    public FieldStruct allCards;
 
     public ContextStruct()
     {
+        refToBoard = GameObject.Find("ReferenceToTheBoard").GetComponent<RefToBoard>();
         fieldList = new List<FieldStruct>();
+        allCards = new FieldStruct();
     }
-}
 
-public class EffectStruct // Work on this...
-{
-    public string name;
-    public Dictionary<string, int> INT_PARAMS;
-    public Dictionary<string, string> STRING_PARAMS;
-    public Dictionary<string, bool> BOOL_PARAMS;
-    public ContextStruct context; // Maybe isn't mandatory
-    public FieldStruct targets;
-    
-
-    public EffectStruct(EffectNode effect)
+    public void Add(FieldStruct field)
     {
-        name = effect.name.name;
-
-
-        ///
+        fieldList.Add(field);
+        foreach (CardStruct card in field.cardList)
+        {
+            allCards.Add(card);
+        }
     }
 
+    public override object Acces(object key) // See the faction theme...
+    {
+        string k = key as string;
+        string faction = MyTools.GetFaction();
+
+        if (faction == "Shrek")
+        {
+            if (k == "Hand") return refToBoard.shrekHand;
+            if (k == "Graveyard") return refToBoard.shrekGraveyard;
+            if (k == "Deck") return refToBoard.shrekDeck;
+            if (k == "Melee") return refToBoard.shrekMelee;
+            if (k == "Range") return refToBoard.shrekRange;
+            if (k == "Siege") return refToBoard.shrekSiege;
+        }
+        else
+        {
+            if (k == "Hand") return refToBoard.badHand;
+            if (k == "Graveyard") return refToBoard.badGraveyard;
+            if (k == "Deck") return refToBoard.badDeck;
+            if (k == "Melee") return refToBoard.badMelee;
+            if (k == "Range") return refToBoard.badRange;
+            if (k == "Siege") return refToBoard.badSiege;
+        }
+
+        return default;
+    }
+
+    public override object SetAcces(object key, object value, bool isLast = false)
+    {
+        string k = key as string;
+        string faction = fieldList[0].cardList[0].Acces("Faction") as string;
+
+        if (isLast)
+        {
+            if (faction == "Shrek")
+            {
+                if (k == "Hand")  refToBoard.shrekHand = value as FieldStruct;
+                if (k == "Graveyard")  refToBoard.shrekGraveyard = value as FieldStruct;
+                if (k == "Deck")  refToBoard.shrekDeck = value as FieldStruct;
+                if (k == "Melee")  refToBoard.shrekMelee = value as FieldStruct;
+                if (k == "Range")  refToBoard.shrekRange = value as FieldStruct;
+                if (k == "Siege")  refToBoard.shrekSiege = value as FieldStruct;
+            }
+            else
+            {
+                if (k == "Hand")  refToBoard.badHand = value as FieldStruct;
+                if (k == "Graveyard")  refToBoard.badGraveyard = value as FieldStruct;
+                if (k == "Deck")  refToBoard.badDeck = value as FieldStruct;
+                if (k == "Melee")  refToBoard.badMelee = value as FieldStruct;
+                if (k == "Range")  refToBoard.badRange = value as FieldStruct;
+                if (k == "Siege")  refToBoard.badSiege = value as FieldStruct;
+            }
+        }
+
+        if (faction == "Shrek")
+        {
+            if (k == "Hand") return refToBoard.shrekHand;
+            if (k == "Graveyard") return refToBoard.shrekGraveyard;
+            if (k == "Deck") return refToBoard.shrekDeck;
+            if (k == "Melee") return refToBoard.shrekMelee;
+            if (k == "Range") return refToBoard.shrekRange;
+            if (k == "Siege") return refToBoard.shrekSiege;
+        }
+        else
+        {
+            if (k == "Hand") return refToBoard.badHand;
+            if (k == "Graveyard") return refToBoard.badGraveyard;
+            if (k == "Deck") return refToBoard.badDeck;
+            if (k == "Melee") return refToBoard.badMelee;
+            if (k == "Range") return refToBoard.badRange;
+            if (k == "Siege") return refToBoard.badSiege;
+        }
+
+        return default;
+    }
+
+    public bool Contains(FieldStruct field)
+    {
+        return fieldList.Contains(field);
+    }
+
+    public FieldStruct DeckOfPlayer(ContextStruct player)
+    {
+        FieldStruct shrek = refToBoard.shrekDeck;
+        FieldStruct bad = refToBoard.badDeck;
+
+        if (player.Contains(shrek) && Contains(shrek)) return shrek;
+        if (player.Contains(bad) && Contains(bad)) return bad;
+
+        return default;
+    }
+
+    public FieldStruct HandOfPlayer(ContextStruct player)
+    {
+        FieldStruct shrek = refToBoard.shrekHand;
+        FieldStruct bad = refToBoard.badHand;
+
+        if (player.Contains(shrek) && Contains(shrek)) return shrek;
+        if (player.Contains(bad) && Contains(bad)) return bad;
+
+        return default;
+    }
+
+    public FieldStruct GraveyardOfPlayer(ContextStruct player)
+    {
+        FieldStruct shrek = refToBoard.shrekGraveyard;
+        FieldStruct bad = refToBoard.badGraveyard;
+
+        if (player.Contains(shrek) && Contains(shrek)) return shrek;
+        if (player.Contains(bad) && Contains(bad)) return bad;
+
+        return default;
+    }
+
+    public FieldStruct FieldOfPlayer(ContextStruct player)
+    {
+        FieldStruct cards = new FieldStruct();
+        FieldStruct graveyard = GraveyardOfPlayer(player);
+        FieldStruct hand = HandOfPlayer(player);
+        FieldStruct deck = DeckOfPlayer(player);
+
+        foreach (FieldStruct field in fieldList)
+        {
+            if (player.Contains(field) && Contains(field) &&
+                field != hand && field != deck && field != graveyard)
+                cards.Join(field);
+        }
+
+        return cards;
+    }
 }
 
 public class MultiScope
 {
-    public Dictionary<string, int> INT_SCOPE;
-    public Dictionary<string, string> STRING_SCOPE;
-    public Dictionary<string, bool> BOOL_SCOPE;
-    public Dictionary<string, GameObject> CARD_SCOPE;
-    public Dictionary<string, FieldStruct> FIELD_SCOPE;
-    public Dictionary<string, ContextStruct> CONTEXT_SCOPE;
+    Scope<object> scope;
 
     public MultiScope()
     {
-        INT_SCOPE = new Dictionary<string, int>();
-        STRING_SCOPE = new Dictionary<string, string>();
-        BOOL_SCOPE = new Dictionary<string, bool>();
-        CARD_SCOPE = new Dictionary<string, GameObject>();
-        FIELD_SCOPE = new Dictionary<string, FieldStruct>();
-        CONTEXT_SCOPE = new Dictionary<string, ContextStruct>();
+        scope = new Scope<object>();
     }
 
-    public bool Equals(MultiScope other) // Let's see if it fits in anyone...
+    public MultiScope(MultiScope globalScope)
     {
-        if (INT_SCOPE != other.INT_SCOPE) return false;
-        if (STRING_SCOPE != other.STRING_SCOPE) return false;
-        if (BOOL_SCOPE != other.BOOL_SCOPE) return false;
-        if (CARD_SCOPE != other.CARD_SCOPE) return false;
-        if (FIELD_SCOPE != other.FIELD_SCOPE) return false;
-        if (CONTEXT_SCOPE != other.CONTEXT_SCOPE) return false;
-        return true;
+        scope = new Scope<object>(globalScope.scope);
+    }
+
+    public bool IsInScope(string key)
+    {
+        return scope.IsInScope(key);
+    }
+
+    public object Get(string key)
+    {
+        return scope.Get(key);
+    }
+
+    public void Set(string key, object value)
+    {
+        scope.Set(key, value);
     }
 }

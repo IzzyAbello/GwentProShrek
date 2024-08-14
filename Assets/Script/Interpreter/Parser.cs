@@ -9,6 +9,7 @@ public class Parser
     public string curError;
     public Scope <ASTType.Type> GLOBAL_SCOPE;
     public Dictionary<string, EffectNode> EFFECT_LIST;
+    public CardNode CARD;
 
     public Parser(Lexer lexer)
     {
@@ -199,7 +200,7 @@ public class Parser
             if (token.type == Token.Type.MULT || token.type == Token.Type.DIVIDE || token.type == Token.Type.MOD)
             {
                 Eat(token.type);
-                node = new BinOp(node, token, Expression(scope));
+                node = new BinOp(node, token, Term(scope));
                 if (!IsPossibleBinOp(node as BinOp)) ErrorInBinOp(node as BinOp);
             }
             return node;
@@ -291,7 +292,7 @@ public class Parser
             if (token.type == Token.Type.OR)
             {
                 Eat(Token.Type.OR);
-                node = new BinOp(node, token, BooleanExpression(scope));
+                node = new BinOp(node, token, BooleanTerm(scope));
                 if (!IsPossibleBinOp(node as BinOp)) ErrorInBinOp(node as BinOp);
             }
             return node;
@@ -780,13 +781,6 @@ public class Parser
                 return ForLoopStatement(scope);
             }
 
-            if (currentToken.type == Token.Type.FUNCTION)
-            {
-                Function node = FunctionStatement(currentToken.value, scope);
-                if (node.type != ASTType.Type.VOID) ErrorInvalidStatement();
-                return node;
-            }
-
             if (currentToken.type == Token.Type.ID)
             {
                 Var variable = Variable(scope);
@@ -810,8 +804,9 @@ public class Parser
                 }
                 else if (currentToken.type == Token.Type.MINUSMINUS || currentToken.type == Token.Type.PLUSPLUS)
                 {
-                    UnaryOp node = new UnaryOp(currentToken, variable);
-                    if (variable.type != ASTType.Type.INT) ErrorInUnaryOp(node);
+                    UnaryOp plusnode = new UnaryOp(currentToken, variable);
+                    if (variable.type != ASTType.Type.INT) ErrorInUnaryOp(plusnode);
+                    Assign node = new Assign(variable, currentToken, plusnode);
                     Eat(currentToken.type);
                     return node;
                 }
@@ -885,6 +880,8 @@ public class Parser
             Eat(Token.Type.TYPE);
             Eat(Token.Type.COLON);
             TypeNode node = new TypeNode(currentToken);
+            if (node.type != "Oro" && node.type != "Plata")
+                Error("Invalid Type of Card: You may try with 'Oro' or 'Plata'");
             Eat(Token.Type.STRING);
             return node;
         }
@@ -902,6 +899,8 @@ public class Parser
             Eat(Token.Type.FACTION);
             Eat(Token.Type.COLON);
             Faction node = new Faction(currentToken);
+            if (node.faction != "Shrek" && node.faction != "Lord Farquaad")
+                Error("Invalid Faction for Card: You may try with 'Shrek' or 'Lord Farquaad'");
             Eat(Token.Type.STRING);
             return node;
         }
@@ -937,6 +936,8 @@ public class Parser
             Eat(Token.Type.COLON);
             Eat(Token.Type.L_SQ_BRACKET);
             Range node = new Range(currentToken);
+            if (node.range != "Melee" && node.range != "Ranged" && node.range != "Siege")
+                Error("Invalid Zone for Card: You may try with 'Melee', 'Ranged' or 'Siege'");
             Eat(Token.Type.STRING);
             Eat(Token.Type.R_SQ_BRACKET);
             return node;
@@ -1286,6 +1287,8 @@ public class Parser
             else node = new OnActivationElement(effectOnActivation, selector, postAction);
 
             if (effectOnActivation == null) ErrorInNodeCreation(node);
+            if (selector != null && selector.source.source == "parent") 
+                Error("Invalid source parent, Effect is not a Post Action node");
 
             return node;
         }
@@ -1433,6 +1436,8 @@ public class Parser
             List<AST> listOfParameters = new List<AST> { name, type, faction, power, range, onActivation };
             foreach (AST child in listOfParameters)
                 if (child == null) { ErrorInNodeCreation(node); break; }
+
+            CARD = node;
 
             return node;
         }

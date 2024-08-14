@@ -66,12 +66,12 @@ public class Hand : MonoBehaviour
             deck.RemoveFromDeck(1);
         }
 
-        Debug.Log("Cards in hand: ");
+        /*Debug.Log("Cards in hand: ");
         for (int i = 0; i < hand.Count; i++)
         {
             hand[i].GetComponent<DisplayCard>().CardReset();
             Debug.Log($"Card {i}: {hand[i].gameObject.name}");
-        }
+        }*/
     }
 
     private void Start()

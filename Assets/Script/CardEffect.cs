@@ -11,7 +11,6 @@ public class CardEffect : MonoBehaviour
     private GameObject cardToRemoveOpposite;
     private AudioManager audioM;
 
-
     public void PlayEffect ()
     {
         audioM = GameObject.Find("AudioManager").GetComponent<AudioManager>();
@@ -172,6 +171,15 @@ public class CardEffect : MonoBehaviour
 
             dropZoneCards.ClearDropZone(true);
             oppositeCards.ClearDropZone(true);
+        }
+
+        if (effect == "Special")
+        {
+            audioM.PlaySound(audioM.effectPowerUpAudio);
+
+            Interpreter interpreter = GetComponent<DisplayCard>().interpreter;
+
+            interpreter.InterpretEffectToPlay();
         }
     }
 }

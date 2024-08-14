@@ -82,8 +82,8 @@ public class DragDrop : MonoBehaviour
 
                 gameObject.GetComponent<CardEffect>().PlayEffect();
 
-                Debug.Log($"Card removed from Hand: {gameObject.name}");
-                Debug.Log($"Card added to Drop Zone: {gameObject.name}");
+                /*Debug.Log($"Card removed from Hand: {gameObject.name}");
+                Debug.Log($"Card added to Drop Zone: {gameObject.name}");*/
 
                 if (!hand.GetComponent<Hand>().isPass)
                 {

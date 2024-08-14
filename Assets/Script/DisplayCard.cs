@@ -13,7 +13,7 @@ public class DisplayCard : MonoBehaviour
     public bool isUnderClimateEffect = false;
     public bool isAverage = false;
     public Card displayCard;
-
+    public Interpreter interpreter;
 
     public int cardId;
     public int cardFaction;
@@ -38,7 +38,6 @@ public class DisplayCard : MonoBehaviour
     public Image cardImage;
     public Image effectImage;
     public Image zoneImage;
-
 
     public void CardReset ()
     {
@@ -81,6 +80,13 @@ public class DisplayCard : MonoBehaviour
         powerText.text = cardPower.ToString();
         powerText.color = Color.yellow;
         isAverage = true;
+    }
+
+    public void SetPower (int power)
+    {
+        displayCard.cardPower = power;
+        cardPower = power;
+        powerText.text = cardPower.ToString();
     }
 
     public void SetImages ()
@@ -181,9 +187,8 @@ public class DisplayCard : MonoBehaviour
         zoneImage.sprite = aux;
     }
 
-    void Start()
+    public void GetStated()
     {
-
         cardId = displayCard.cardId;
         cardFaction = displayCard.cardFaction;
         cardPower = displayCard.cardPower;
@@ -202,5 +207,12 @@ public class DisplayCard : MonoBehaviour
         cardImage.sprite = cardSprite;
 
         SetImages();
+
+        interpreter = displayCard.interpreter;
+    }
+
+    void Start()
+    {
+        GetStated();
     }
 }

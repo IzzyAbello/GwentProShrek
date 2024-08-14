@@ -18,18 +18,7 @@ public class Card : ScriptableObject
     public char cardZone = 'M';               // M, R, S
     public string cardEffect = "None";
     public Sprite cardSprite;
-
-    public Card(int cardId, int cardFaction, int cardPowerOG, string cardName, char cardKind, char cardZone)
-    {
-        this.cardId = cardId;
-        this.cardFaction = cardFaction;
-        this.cardPowerOG = cardPowerOG;
-        cardPower = cardPowerOG;
-        this.cardName = cardName;
-        this.cardKind = cardKind;
-        this.cardZone = cardZone;
-        this.cardEffect = "Special";
-    }
+    public Interpreter interpreter;
 
     public Card ()
     {

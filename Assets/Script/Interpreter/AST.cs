@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using UnityEngine;
 
-
 /// <summary>
 /// 
 /// AST
@@ -260,19 +259,6 @@ public class Power : AST
     public override void Print(string height)
     {
         Debug.Log(height + "-Power: " + power);
-    }
-}
-
-public class PowerAsField : AST
-{
-    public PowerAsField()
-    {
-
-    }
-
-    public override void Print(string height)
-    {
-        Debug.Log(height + "-Power as Field");
     }
 }
 

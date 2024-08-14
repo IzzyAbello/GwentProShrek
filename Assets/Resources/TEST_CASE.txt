@@ -1,21 +1,38 @@
 effect
 {
-	Name: "ReturnToDeck",
+	Name: "AumentaShrek",
 	Action: (targets, context) =>
 	{
-		n = 2;
 		for target in targets
 		{
-			owner = target.Owner;
-			deck = context.DeckOfPlayer(owner);
-			c = deck[5];
-			k = c.Power;
-			s = "culo";
-			while (k > 0)
+			if (target.Power >= 3)
 			{
-				c.Name @= ("Pinga" @@ s);
-				k -= n; 
+				target.Power += 10;
 			};
 		};
 	}
+}
+
+card
+{
+	Name: "Popopopo",
+	Type: "Plata",
+	Faction: "Shrek",
+	Power: 25,
+	Range: ["Melee"],
+	OnActivation:
+	[
+		{
+			Effect: 
+			{
+				Name: "AumentaShrek"
+			},
+			Selector:
+			{
+				Source: "board",
+				Single: false,
+				Predicate: (unit) => (unit.Faction == "Lord" @@ "Farquaad")
+			}
+		}
+	]
 }
