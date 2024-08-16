@@ -386,7 +386,7 @@ public class Parser
                             Eat(token.type);
                             Var v = new Var(token, ASTType.Type.STRING);
                             if (token.type == Token.Type.POWER) v.type = ASTType.Type.INT;
-                            if (token.type == Token.Type.OWNER) v.type = ASTType.Type.FIELD;
+                            if (token.type == Token.Type.OWNER) v.type = ASTType.Type.CONTEXT;
                             nd.args.Add(v);
                         }
                         else if (token.type == Token.Type.POINTER)
@@ -609,7 +609,7 @@ public class Parser
         try
         {
             Var player = Variable(scope);
-            if (!scope.IsInScope(player) || player.type != ASTType.Type.FIELD) 
+            if (!scope.IsInScope(player) || player.type != ASTType.Type.CONTEXT) 
                 ErrorInvalidParameterInFunction(name);
             Args args = new Args();
             args.Add(player);
@@ -1712,7 +1712,7 @@ public class Parser
                 Error("Cannot parse all of text");
             }
 
-            node.Print("");
+            //node.Print("");
 
             return node;
         }

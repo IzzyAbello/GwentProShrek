@@ -1,37 +1,83 @@
 effect
 {
-	Name: "AumentaShrek",
+	Name: "Farkua",
 	Action: (targets, context) =>
 	{
+		farquaad = targets[0];
+		farquaad.Name = "Cachucha";
+		farquaad.Power = 20;
+		context.Hand.Add(farquaad);
+	}
+}
+
+effect
+{
+	Name: "Post",
+	Params: {amount: Number, title: String},
+	Action: (t, c) =>
+	{
+		for element in t
+		{
+			element.Name = title;
+			element.Power = amount;
+		};
+	}
+}
+
+effect
+{
+	Name: "Churrupia",
+	Action: (targets, context) =>
+	{
+		n = -1;
 		for target in targets
 		{
-			if (target.Power >= 3)
-			{
-				target.Power += 10;
-			};
+			n++;
+		};
+		while (n-- > 0)
+		{
+			targets[n].Name @= "Churrupia";
 		};
 	}
 }
 
 card
 {
-	Name: "Popopopo",
-	Type: "Plata",
+	Name: "Pichurria",
+	Type: "Oro",
 	Faction: "Shrek",
-	Power: 25,
+	Power: 5,
 	Range: ["Melee"],
 	OnActivation:
 	[
 		{
 			Effect: 
 			{
-				Name: "AumentaShrek"
+				Name: "Farkua"
 			},
 			Selector:
 			{
 				Source: "board",
 				Single: false,
-				Predicate: (unit) => (unit.Faction == "Lord" @@ "Farquaad")
+				Predicate: (unit) => (unit.Name == "Lord Farquaad")
+			},
+			PostAction:
+			{
+				Effect: { Name: "Post", amount : (23 - 4*2), title : "Wachipupa"},
+				Selector:
+				{
+					Source: "parent",
+					Predicate: (unit) => (unit.Faction == "Shrek")
+				}
+			}
+		},
+		{
+			Effect: {Name: "Churrupia"},
+			Selector:
+			{
+				Source: "hand",
+				Single: false,
+				Predicate: (element) => (true)	
 			}
 		}
 	]

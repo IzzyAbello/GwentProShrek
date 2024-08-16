@@ -92,7 +92,7 @@ public class RefToBoard : MonoBehaviour
         allBoard.Add(badMelee);
 
         shrekDeck = new FieldStruct(shrekDeckRef);
-        badDeck = new FieldStruct(shrekDeckRef);
+        badDeck = new FieldStruct(badDeckRef);
         shrekFaction.Add(shrekDeck);
         badFaction.Add(badDeck);
         allBoard.Add(shrekDeck);
@@ -134,9 +134,13 @@ public class RefToBoard : MonoBehaviour
 
     public FieldStruct SetField(FieldStruct field, FieldStruct target, bool single = false)
     {
+        ContextStruct toAdd = (target == shrekDeck || target == shrekHand || target == shrekSiege
+            || target == shrekRange || target == shrekMelee || target == shrekGraveyard) ?
+            shrekFaction : badFaction;
+
         target = FilterCards(field, target);
         if (single) target = SingleFilter(target);
-        shrekFaction.Add(target);
+        toAdd.Add(target);
         allBoard.Add(target);
 
         return target;
@@ -148,7 +152,7 @@ public class RefToBoard : MonoBehaviour
         badFaction = new ContextStruct();
 
         shrekDeck = SetField(field, shrekDeck, single);
-        badDeck = SetField(field, shrekDeck, single);
+        badDeck = SetField(field, badDeck, single);
 
         shrekHand = SetField(field, shrekHand, single);
         badHand = SetField(field, badHand, single);
@@ -177,7 +181,7 @@ public class RefToBoard : MonoBehaviour
     public FieldStruct SingleFilter(FieldStruct target)
     {
         if (target.cardList.Count > 0)
-            while (target.cardList.Count == 1)
+            while (target.cardList.Count != 1)
                 target.cardList.RemoveAt(1);
         return target;
     }

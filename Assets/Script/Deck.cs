@@ -12,7 +12,7 @@ public class Deck : MonoBehaviour
 
     void ShuffleDeck ()
     {
-        Debug.Log("Shuffling Deck...\n");
+        //Debug.Log("Shuffling Deck...\n");
 
         for (int i = 0; i < deck.Count; i++)
         {
@@ -27,7 +27,7 @@ public class Deck : MonoBehaviour
     {
         for (int i = 1; i <= amount; i++)
         {
-            Debug.Log($"Card removed from deck: {deck[0].name}");
+            //Debug.Log($"Card removed from deck: {deck[0].name}");
             deck.RemoveAt(0);
         }
 
@@ -35,7 +35,7 @@ public class Deck : MonoBehaviour
     
     void Awake()
     {
-        Debug.Log("Creating Deck...\n");
+        //Debug.Log("Creating Deck...\n");
 
 
         //deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/BadFaction/HuevoCard.prefab")); Template
@@ -124,9 +124,14 @@ public class Deck : MonoBehaviour
             deck.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cards/BadFaction/Special/AumentoBadCard.prefab"));
         }
 
-        Debug.Log($"Deck full size: {deck.Count}");
+        //Debug.Log($"Deck full size: {deck.Count}");
 
         ShuffleDeck();
+
+        foreach (GameObject card in deck)
+        {
+            card.GetComponent<DisplayCard>().CardReset();
+        }
     }
 
     private void Update()

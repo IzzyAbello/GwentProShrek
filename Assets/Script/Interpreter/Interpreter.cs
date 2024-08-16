@@ -22,7 +22,12 @@ public class Interpreter
             Ref = GameObject.Find("ReferenceToTheBoard").GetComponent<RefToBoard>();
             ResetRefAndContext();
 
-            if (parser.curError == "") CardVisit(parser.CARD);
+            if (parser.curError == "")
+            {
+                Debug.Log("Parse-Semantic check: OK");
+                CardVisit(parser.CARD);
+            }
+            else Debug.Log("Parse-Semantic check: ERROR");
         }
         catch
         {
@@ -100,8 +105,8 @@ public class Interpreter
                 bool l = (bool)left, r = (bool)right;
                 if (node.op.type == Token.Type.EQUAL) return l == r;
                 if (node.op.type == Token.Type.DIFFER) return l != r;
-                if (node.op.type == Token.Type.AND) return l & r;
-                if (node.op.type == Token.Type.OR) return l | r;
+                if (node.op.type == Token.Type.AND) return l && r;
+                if (node.op.type == Token.Type.OR) return l || r;
             }
 
             if (left.GetType() == typeof(string))
@@ -117,16 +122,25 @@ public class Interpreter
 
     public object UnaryOpVisit(UnaryOp node, MultiScope scope)
     {
-        object expression = Visit(node, scope);
+        object expression = Visit(node.expression, scope);
 
         if (node.type == ASTType.Type.INT)
         {
             int e = (int)expression;
 
             if (node.operation.type == Token.Type.PLUS) return +e;
-            if (node.operation.type == Token.Type.MINUS) return -e;
-            if (node.operation.type == Token.Type.PLUSPLUS) return e + 1;
-            if (node.operation.type == Token.Type.MINUSMINUS) return e - 1;
+            else if (node.operation.type == Token.Type.MINUS) return -e;
+            else
+            {
+                Var variable = node.expression as Var;
+                if (node.operation.type == Token.Type.PLUSPLUS) e++;
+                if (node.operation.type == Token.Type.MINUSMINUS) e--;
+
+                SetValue(variable, scope, e);
+                return e;
+            }
+            
+            
         }
 
         if (node.type == ASTType.Type.BOOL)
@@ -165,10 +179,10 @@ public class Interpreter
         Var v = node.left;
         string op = node.op.value;
         string key = node.left.value;
-        object left = (node.left.GetType() == typeof(VarComp)) ?
-            VarCompVisit(node.left as VarComp, scope) : scope.Get(key);
+        object left = default;
+        if (node.left.GetType() == typeof(VarComp)) left = VarCompVisit(node.left as VarComp, scope);
+        else if (scope.IsInScope(key)) left = scope.Get(key);
         object right = Visit(node.right, scope);
-
 
         if (op == "=") SetValue(v, scope, right);
         if (op == "+=") SetValue(v, scope, (int)left + (int)right);
@@ -249,7 +263,7 @@ public class Interpreter
                 Function function = member as Function;
                 last = FunctionVisit(function, lastAST, last, scope);
             }
-            if (member.GetType() == typeof(Indexer))
+            else if (member.GetType() == typeof(Indexer))
             {
                 FieldStruct field = last as FieldStruct;
                 Indexer indexer = member as Indexer;
@@ -277,7 +291,8 @@ public class Interpreter
     public object FunctionVisit(Function node, AST realContext, object context, MultiScope scope)
     {
         string name = node.functionName;
-        object parameter = (node.args != null) ? Visit(node.args.args[0], scope) : default;
+        object parameter = (node.args != null && name != "Find")
+            ? Visit(node.args.args[0], scope) : default;
         bool isReal = (realContext.GetType() == typeof(Pointer));
 
         if (name == "Add")
@@ -320,7 +335,7 @@ public class Interpreter
                 GameObject parent = GameObject.Find("Abyss");
                 GameObject card = field.cardList[0].card;
                 GameObject.Instantiate(card, parent.transform);
-                GameObject.Destroy(card);
+                GameObject.DestroyImmediate(card, true);
             }
 
             return field.Pop();
@@ -368,6 +383,24 @@ public class Interpreter
             return field.FieldOfPlayer(player);
         }
 
+        if (name == "Find")
+        {
+            FieldStruct field = context as FieldStruct;
+            Var unit = node.args.args[0] as Var;
+            AST condition = node.args.args[1];
+            FieldStruct toReturn = new FieldStruct();
+            foreach (CardStruct card in field.cardList)
+            {
+                SetValue(unit, scope, card);
+
+                if ((bool)Visit(condition, new MultiScope(scope)))
+                {
+                    toReturn.Add(card);
+                }
+            }
+            return toReturn;
+        }
+
         return default;
     }
 
@@ -381,8 +414,10 @@ public class Interpreter
         }
     }
 
-    public void PostActionVisit(PostAction node, MultiScope scope)
+    public void PostActionVisit(PostAction node, MultiScope scope, string source)
     {
+        ResetRefAndContext();
+        if (node.selector.source.source == "parent") node.selector.source.source = source;
         string name = node.effectOnActivation.name.name;
         MultiScope effectParams = EffectOnActivationVisit(node.effectOnActivation, scope);
         allBoard = SelectorVisit(node.selector, scope);
@@ -395,14 +430,13 @@ public class Interpreter
         string name = node.effectOnActivation.name.name;
         MultiScope effectParams = EffectOnActivationVisit(node.effectOnActivation, scope);
         allBoard = SelectorVisit(node.selector, scope);
-
+        string source = node.selector.source.source;
         EffectNode effect = parser.EFFECT_LIST[name];
         EffectActionVisit(effect, effectParams);
 
         if (node.postAction != null)
         {
-            if (node.postAction.selector.source.source != "parent") ResetRefAndContext();
-            PostActionVisit(node.postAction, scope);
+            PostActionVisit(node.postAction, scope, source);
         }
     }
 
@@ -431,13 +465,11 @@ public class Interpreter
             context = (scope.Get("$$$Card->\tFaction") as string == Ref.shrekFactionString)
                 ? Ref.badFaction : Ref.shrekFaction;
 
-        MultiScope innerScope = new MultiScope(scope);
-
         FieldStruct allCardsAfterPredicate = new FieldStruct();
         foreach (CardStruct card in context.allCards.cardList)
         {
-            SetValue(node.predicate.unit, innerScope, card);
-            bool condition = (bool)Visit(node.predicate.condition, innerScope);
+            SetValue(node.predicate.unit, scope, card);
+            bool condition = (bool)Visit(node.predicate.condition, new MultiScope(scope));
             if (condition) allCardsAfterPredicate.Add(card);
         }
 
@@ -479,16 +511,18 @@ public class Interpreter
     public void WhileLoopVisit(WhileLoop node, MultiScope scope)
     {
         while ((bool)Visit(node.condition, scope))
+        {
             CompoundVisit(node.body, scope);
+        }       
     }
 
     public void ForLoopVisit(ForLoop node, MultiScope scope)
-    {
+    {   
         FieldStruct field = Visit(node.targets, scope) as FieldStruct;
 
         foreach (CardStruct card in field.cardList)
         {
-            SetValue(node.target, scope, card);
+            SetValue(node.target, scope, card);    
             CompoundVisit(node.body, scope);
         }
     }

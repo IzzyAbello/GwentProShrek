@@ -59,7 +59,7 @@ public class Hand : MonoBehaviour
             if (size <= 10)
             {
                 hand.Add(deck.deck[0]);
-                Debug.Log($"Card added to hand: {hand[hand.Count - 1].name}");
+                //Debug.Log($"Card added to hand: {hand[hand.Count - 1].name}");
                 GameObject playerCard = Instantiate(hand[i], new Vector3(0, 0, 0), Quaternion.identity);
                 playerCard.transform.SetParent(playerHand.transform, false);
             }

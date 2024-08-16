@@ -34,9 +34,10 @@ public static class MyTools
     public static string GetFaction()
     {
         SwitchTurn logic = GameObject.Find("PlayTurnButton").GetComponent<SwitchTurn>(); ;
-        Vector3 position = new Vector3(logic.playPositionHand.x, logic.playPositionHand.y);
+        float shrek = logic.handShrek.transform.position.y;
+        float bad = logic.handBad.transform.position.y;
 
-        return (position == logic.handShrek.transform.position) ? "Shrek" : "Lord Farquaad";
+        return (shrek > bad) ? "Shrek" : "Lord Farquaad";
     }
 
     public static GameObject SetPointer(RefToBoard refToBoard, Pointer pointer)

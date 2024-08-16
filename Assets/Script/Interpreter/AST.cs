@@ -640,7 +640,7 @@ public class Function : ASTType
     public void TypeToReturn()
     {
         if (functionName == "FieldOfPlayer")
-            type = Type.CONTEXT;
+            type = Type.FIELD;
         if (functionName == "Find")
             type = Type.FIELD;
         if (functionName == "HandOfPlayer")

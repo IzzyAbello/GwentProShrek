@@ -117,7 +117,7 @@ public class CardStruct : InterpreterStruct
 
         if (k == "Power") return dp.cardPower;
         if (k == "Name") return dp.cardName;
-        if (k == "Type") return (dp.cardKind == 'g') ? "Gold" : "Silver";
+        if (k == "Type") return (dp.cardKind == 'g') ? "Oro" : "Plata";
         if (k == "Range")
         {
             char zone = dp.cardZone;
@@ -229,7 +229,8 @@ public class FieldStruct : InterpreterStruct
         {
             GetDisplay(cardZone.GetComponent<Deck>().deck);
         }
-        else foreach (Transform card in cardZone.transform)
+        else 
+            foreach (Transform card in cardZone.transform)
             {
                 cardList.Add(new CardStruct(card.gameObject));
             }
@@ -330,10 +331,11 @@ public class ContextStruct : InterpreterStruct
         }
     }
 
-    public override object Acces(object key) // See the faction theme...
+    public override object Acces(object key)
     {
         string k = key as string;
-        string faction = MyTools.GetFaction();
+        string faction = (allCards.cardList.Count > 0) ?
+            allCards.cardList[0].Acces("Faction") as string : MyTools.GetFaction();
 
         if (faction == "Shrek")
         {
@@ -343,6 +345,7 @@ public class ContextStruct : InterpreterStruct
             if (k == "Melee") return refToBoard.shrekMelee;
             if (k == "Range") return refToBoard.shrekRange;
             if (k == "Siege") return refToBoard.shrekSiege;
+            if (k == "TriggerPlayer") return refToBoard.shrekFaction;
         }
         else
         {
@@ -352,6 +355,7 @@ public class ContextStruct : InterpreterStruct
             if (k == "Melee") return refToBoard.badMelee;
             if (k == "Range") return refToBoard.badRange;
             if (k == "Siege") return refToBoard.badSiege;
+            if (k == "TriggerPlayer") return refToBoard.badFaction;
         }
 
         return default;
@@ -360,105 +364,80 @@ public class ContextStruct : InterpreterStruct
     public override object SetAcces(object key, object value, bool isLast = false)
     {
         string k = key as string;
-        string faction = fieldList[0].cardList[0].Acces("Faction") as string;
+        string faction = (allCards.cardList.Count > 0) ?
+            allCards.cardList[0].Acces("Faction") as string : MyTools.GetFaction();
 
         if (isLast)
         {
             if (faction == "Shrek")
             {
-                if (k == "Hand")  refToBoard.shrekHand = value as FieldStruct;
-                if (k == "Graveyard")  refToBoard.shrekGraveyard = value as FieldStruct;
-                if (k == "Deck")  refToBoard.shrekDeck = value as FieldStruct;
-                if (k == "Melee")  refToBoard.shrekMelee = value as FieldStruct;
-                if (k == "Range")  refToBoard.shrekRange = value as FieldStruct;
-                if (k == "Siege")  refToBoard.shrekSiege = value as FieldStruct;
+                if (k == "Hand") refToBoard.shrekHand = value as FieldStruct;
+                if (k == "Graveyard") refToBoard.shrekGraveyard = value as FieldStruct;
+                if (k == "Deck") refToBoard.shrekDeck = value as FieldStruct;
+                if (k == "Melee") refToBoard.shrekMelee = value as FieldStruct;
+                if (k == "Range") refToBoard.shrekRange = value as FieldStruct;
+                if (k == "Siege") refToBoard.shrekSiege = value as FieldStruct;
             }
             else
             {
-                if (k == "Hand")  refToBoard.badHand = value as FieldStruct;
-                if (k == "Graveyard")  refToBoard.badGraveyard = value as FieldStruct;
-                if (k == "Deck")  refToBoard.badDeck = value as FieldStruct;
-                if (k == "Melee")  refToBoard.badMelee = value as FieldStruct;
-                if (k == "Range")  refToBoard.badRange = value as FieldStruct;
-                if (k == "Siege")  refToBoard.badSiege = value as FieldStruct;
+                if (k == "Hand") refToBoard.badHand = value as FieldStruct;
+                if (k == "Graveyard") refToBoard.badGraveyard = value as FieldStruct;
+                if (k == "Deck") refToBoard.badDeck = value as FieldStruct;
+                if (k == "Melee") refToBoard.badMelee = value as FieldStruct;
+                if (k == "Range") refToBoard.badRange = value as FieldStruct;
+                if (k == "Siege") refToBoard.badSiege = value as FieldStruct;
             }
         }
 
-        if (faction == "Shrek")
-        {
-            if (k == "Hand") return refToBoard.shrekHand;
-            if (k == "Graveyard") return refToBoard.shrekGraveyard;
-            if (k == "Deck") return refToBoard.shrekDeck;
-            if (k == "Melee") return refToBoard.shrekMelee;
-            if (k == "Range") return refToBoard.shrekRange;
-            if (k == "Siege") return refToBoard.shrekSiege;
-        }
-        else
-        {
-            if (k == "Hand") return refToBoard.badHand;
-            if (k == "Graveyard") return refToBoard.badGraveyard;
-            if (k == "Deck") return refToBoard.badDeck;
-            if (k == "Melee") return refToBoard.badMelee;
-            if (k == "Range") return refToBoard.badRange;
-            if (k == "Siege") return refToBoard.badSiege;
-        }
-
-        return default;
-    }
-
-    public bool Contains(FieldStruct field)
-    {
-        return fieldList.Contains(field);
+        return Acces(k);
     }
 
     public FieldStruct DeckOfPlayer(ContextStruct player)
     {
-        FieldStruct shrek = refToBoard.shrekDeck;
-        FieldStruct bad = refToBoard.badDeck;
-
-        if (player.Contains(shrek) && Contains(shrek)) return shrek;
-        if (player.Contains(bad) && Contains(bad)) return bad;
-
-        return default;
+        if (player == refToBoard.shrekFaction)
+        {
+            return refToBoard.shrekDeck;
+        }
+        else
+        {
+            return refToBoard.badDeck;
+        }
     }
 
     public FieldStruct HandOfPlayer(ContextStruct player)
     {
-        FieldStruct shrek = refToBoard.shrekHand;
-        FieldStruct bad = refToBoard.badHand;
-
-        if (player.Contains(shrek) && Contains(shrek)) return shrek;
-        if (player.Contains(bad) && Contains(bad)) return bad;
-
-        return default;
+        if (player == refToBoard.shrekFaction)
+        {
+            return refToBoard.shrekHand;
+        }
+        else
+        {
+            return refToBoard.badHand;
+        }
     }
 
     public FieldStruct GraveyardOfPlayer(ContextStruct player)
     {
-        FieldStruct shrek = refToBoard.shrekGraveyard;
-        FieldStruct bad = refToBoard.badGraveyard;
-
-        if (player.Contains(shrek) && Contains(shrek)) return shrek;
-        if (player.Contains(bad) && Contains(bad)) return bad;
-
-        return default;
+        if (player == refToBoard.shrekFaction)
+        {
+            return refToBoard.shrekGraveyard;
+        }
+        else
+        {
+            return refToBoard.badGraveyard;
+        }
     }
 
     public FieldStruct FieldOfPlayer(ContextStruct player)
     {
-        FieldStruct cards = new FieldStruct();
-        FieldStruct graveyard = GraveyardOfPlayer(player);
-        FieldStruct hand = HandOfPlayer(player);
-        FieldStruct deck = DeckOfPlayer(player);
-
-        foreach (FieldStruct field in fieldList)
+        if (player == refToBoard.shrekFaction)
         {
-            if (player.Contains(field) && Contains(field) &&
-                field != hand && field != deck && field != graveyard)
-                cards.Join(field);
+            return refToBoard.shrekFaction.allCards;
         }
-
-        return cards;
+        else
+        {
+            return refToBoard.badFaction.allCards;
+        }
     }
 }
 
