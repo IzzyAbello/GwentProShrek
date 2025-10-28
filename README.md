@@ -2,7 +2,7 @@
 
 ## 🃏 Introduction
 **GwentPro Shrek** is a strategic card game developed in Unity, inspired by the popular Gwent card game from *The Witcher* series.  
-This game features a unique blend of personalized rules and a thematic backdrop of **Rome vs Greece**, allowing players to engage in tactical battles using custom-built decks.
+This game features a unique blend of personalized rules and a thematic backdrop of **Shrek vs Lord Farquaad**, allowing players to engage in tactical battles using custom-built decks.
 
 ---
 
